@@ -36,12 +36,12 @@ def get_well_centres(image: np.ndarray, plate: dict = PLATE, row_distort: float 
         A dictionary containing measurements of the well plate.
 
     row_distort : float, default = 0
-        A coefficient for scaling well plate centres in the horizontal 
-        direction to account for image distortion. 
+        A coefficient for scaling well plate centres in the vertical direction 
+        to account for image distortion. 
 
     column_distort : float, default = 0
-        A coefficient for scaling well plate centres in the vertical direction 
-        to account for image distortion.        
+        A coefficient for scaling well plate centres in the horizontal 
+        direction to account for image distortion.        
     
     Returns
     -------
@@ -64,7 +64,7 @@ def get_well_centres(image: np.ndarray, plate: dict = PLATE, row_distort: float 
     row_centres *= scale_height
     column_centres *= scale_width
 
-    # If a horizontal scaling coefficient was passed to account for distortion. 
+    # If a vertical scaling coefficient was passed to account for distortion. 
     if row_distort:
         # Calculate the distance of the row-centres from the vertical-centre.
         image_height_centre = image_height // 2
@@ -73,7 +73,7 @@ def get_well_centres(image: np.ndarray, plate: dict = PLATE, row_distort: float 
         # Scale the rows.
         row_centres += row_distort * row_distances
 
-    # If a vertical scaling coefficient was passed to account for distortion.
+    # If a horizontal scaling coefficient was passed to account for distortion.
     if column_distort:
         # Calculate the distance of the column-centres from the horizontal-centre.
         image_width_centre = image_width // 2

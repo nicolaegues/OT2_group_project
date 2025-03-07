@@ -24,8 +24,6 @@ start_row = (iter_size * iter_n) // 12
 start_col = (iter_size * iter_n) % 12
 
 
-
-
 def run(protocol: protocol_api.ProtocolContext):
 
     #loading the tips, reservoir and well plate into the program

@@ -3,6 +3,7 @@ import pandas as pd
 from opentrons import protocol_api
 import subprocess
 import pyswarms as ps
+import os
 
 def auto_input(params, df, iter_c):
     iter_s = params.shape[0]
@@ -32,7 +33,7 @@ class wellplate96:
         end_index = start_index + self.iter_size*self.num_liquids
 
         #saves output parameter to csv
-        self.output.values.reshape(96*self.num_liquids)[start_index:end_index] = params.reshape(12*self.num_liquids)
+        self.output.values.reshape(96*self.num_liquids)[start_index:end_index] = params.reshape(self.iter_size*self.num_liquids)
         self.output.to_csv('output.csv')
 
         with open('iter_count.txt', 'w') as file:
@@ -42,6 +43,7 @@ class wellplate96:
 
         #function to pippette goes here
         #subprocess.run("opentrons_simulate", "opentrons_script.py")
+        os.system('opentrons_simulate opentrons_script.py')
 
         #camera processing and colour extraction function goes here
         values = self.function(params, self.input, self.iteration_count)

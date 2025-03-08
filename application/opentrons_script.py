@@ -6,8 +6,8 @@ import numpy as np
 
 #creates array with volumes, in future this will come from the optimisation program
 #volume = np.array([[20.0, 30.0, 40.0] for i in range(14)])
-iter_n = int(open('iter_count.txt').read())
-volume = np.load('values.npy')
+iter_n = int(open('./data/iter_count.txt').read())
+volume = np.load('./data/values.npy')
 
 requirements = {"robotType": "OT-2", "apiLevel": "2.16"}
 
@@ -39,7 +39,7 @@ def run(protocol: protocol_api.ProtocolContext):
         amt = volume[:, i]
         for j in range(iter_size):
             #calculates current column and row to pipette into
-            current_col = start_col + j % 12
+            current_col = (start_col + j) % 12
             current_row = start_row + (start_col + j) // 12
 
             #transfers X amount of liquid i into the well

@@ -12,10 +12,11 @@ class Image_processing:
             image_path (str): Path to the image file.
             expected_grid (tuple): Expected grid dimensions (rows, columns) for the well plate.
         """
-        self.image_path = image_path  # Store the image path
-        self.expected_grid = expected_grid  # Store the expected grid dimensions
-        self.image = cv.imread(image_path)  # Load the image using OpenCV
-        self.best_circles = None  # Placeholder for detected circles
+        self.image_path = image_path  
+        self.expected_grid = expected_grid  
+        self.image = cv.imread(image_path)  
+        # Placeholder for detected circles
+        self.best_circles = None  
 
     def filter_circular_contours(self, contours):
         """
@@ -49,42 +50,68 @@ class Image_processing:
         Enforces a grid pattern on the detected circles to align them with the expected well plate layout.
         
         Args:
-            circles (np.ndarray): Detected circles.
+            circles (np.ndarray): Detected circles, represented as (x, y and radius).
         
         Returns:
             np.ndarray: Array of circles aligned in a grid pattern.
         """
+        # Check circles are valid
         if circles is None or len(circles[0]) < 2:
             return None  
         
-        # Extract (x, y, radius) positions of the circles
-        circle_positions = circles[0, :, :3]  # Include radius
+        # Extract (x, y, radius) positions of the circles. Selects all circles and their first 3 values (x, y, radius)
+        circle_positions = circles[0, :, :3]  
         
-        # Sort circles by Y-coordinate (row-wise sorting)
+        # Sort circles by Y-coordinate (row-wise sorting).
+        #Circles are processed from top to bottom
         sorted_by_y = sorted(circle_positions, key=lambda p: p[1])
         
-        # Group circles into rows based on proximity in Y-coordinate
+        # Group circles into rows based on distance to Y-coordinates.
         rows = []
-        row_threshold = np.mean(np.diff(sorted_by_y, axis=0)[:, 1]) / 2  # estimate row spacing
+        # Differences in y-coordinates. 
+        y_differences = np.diff([p[1] for p in sorted_by_y])
+        # Median difference between circles in Y-direction
+        median_diff = np.median(y_differences)
+        #Threshold to organise circles into rows
+        row_threshold = median_diff + np.std(y_differences)
+        # Initialise first row ith first circle.
         current_row = [sorted_by_y[0]]
 
+        # Iterate through the remaining circles to organise them into rows
         for i in range(1, len(sorted_by_y)):
+            # Check if the current circle is close enough in Y-coordinate to be part of the current row
             if abs(sorted_by_y[i][1] - current_row[-1][1]) < row_threshold:
-                current_row.append(sorted_by_y[i])  # Add to current row if Y-coordinate is close
-            else:
-                rows.append(sorted(current_row, key=lambda p: p[0]))  # Sort row by X-coordinate
-                current_row = [sorted_by_y[i]]  # Start a new row
+                current_row.append(sorted_by_y[i]) 
 
+            # If not, finish  current row by sorting it by X-coordinate.
+            else:
+                rows.append(sorted(current_row, key=lambda p: p[0])) 
+                current_row = [sorted_by_y[i]]  
+
+        # Add the last row to the list of rows
         rows.append(sorted(current_row, key=lambda p: p[0]))  # Add the last row
 
-        # Flatten rows back into a single array
-        sorted_circles = np.array([circle for row in rows for circle in row])
+        # Confirm numbers of circles
+        corrected_rows = []
+        for row in rows:
+            if len(row) == 12:
+                corrected_rows.append(row)
+            # If the row has too many circles. Sort row by X-coord and keep the first correct
+            #12 circles 
+            elif len(row) > 12:
+                sorted_row = sorted(row, key=lambda p: p[0])
+                corrected_rows.append(sorted_row[:12])
+            else:
+                continue
+
+        # Flatten corrected rows back into a single array
+        sorted_circles = np.array([circle for row in corrected_rows for circle in row])
 
         # Limit to expected number of wells (8x12 = 96)
         if len(sorted_circles) > self.expected_grid[0] * self.expected_grid[1]:
             sorted_circles = sorted_circles[:self.expected_grid[0] * self.expected_grid[1]]
 
-        return np.array([sorted_circles], dtype=np.uint16)
+        return np.array([sorted_circles], dtype=np.float32)
 
     def extract_rgb_values(self, circles, radius=1):
         """
@@ -105,7 +132,7 @@ class Image_processing:
         
         # Iterate through all detected circles to extract RGB values
         for circle in circles[0, :]:
-            x, y = circle[0], circle[1]
+            x, y, r = int(circle[0]), int(circle[1]), int(circle[2])
             rgb = np.zeros(3, dtype=np.float32)
             count = 0
             
@@ -167,7 +194,7 @@ class Image_processing:
             circles = cv.HoughCircles(
                 blurred, 
                 cv.HOUGH_GRADIENT, 
-                dp=1.2, 
+                dp=1, 
                 minDist=15,  
                 param1=50, 
                 param2=param2,  
@@ -204,10 +231,14 @@ class Image_processing:
         if self.best_circles is not None:
             image = self.image.copy()
             for idx, circle in enumerate(self.best_circles[0, :]):
-                center = (circle[0], circle[1])
-                radius = circle[2]
-                cv.circle(image, center, radius, (0, 255, 0), 2)  # Draw green circle
-                cv.circle(image, center, 5, (0, 0, 255), -1)  # Draw red bullseye
+                # Ensure centre and radius are integers
+                x, y, r = int(circle[0]), int(circle[1]), int(circle[2])  # Convert to integers
+                center = (x, y)  
+                radius = r  
+                # Draw green circle
+                cv.circle(image, center, radius, (0, 255, 0), 2)  
+                # Draw red bullseye
+                cv.circle(image, center, 5, (0, 0, 255), -1)  
                 cv.putText(image, f"W{idx + 1}", (center[0] - 10, center[1] + 5), 
                             cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)  # Label the circle
             

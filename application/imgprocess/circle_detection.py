@@ -1,42 +1,89 @@
-import cv2 as cv
-import numpy as np
-import matplotlib.pyplot as plt
+
+import cv2 as cv  
+import numpy as np  
+import matplotlib.pyplot as plt  
 
 class Image_processing:
-    def __init__(self, image_path, expected_grid=(8,12)):
-        self.image_path = image_path
-        self.expected_grid = expected_grid
-        self.image = cv.imread(image_path)
-        self.best_circles = None
-        self.labelled_rgb_values = None  # Store labelled RGB values here
-
-    def enforce_grid_pattern(self, circles):
+    def __init__(self, image_path, expected_grid=(8, 12)):
         """
-        Forces a grid structure on detected circles by sorting and filtering.
+        Initialises the Image_processing class with the image path and expected grid dimensions.
         
         Args:
-            circles (np.ndarray): Detected circles from HoughCircles.
+            image_path (str): Path to the image file.
+            expected_grid (tuple): Expected grid dimensions (rows, columns) for the well plate.
+        """
+        self.image_path = image_path  # Store the image path
+        self.expected_grid = expected_grid  # Store the expected grid dimensions
+        self.image = cv.imread(image_path)  # Load the image using OpenCV
+        self.best_circles = None  # Placeholder for detected circles
+
+    def filter_circular_contours(self, contours):
+        """
+        Filters contours to keep only those that are  circular.
+        
+        Args:
+            contours (list): List of contours detected in the image.
         
         Returns:
-            np.ndarray: Filtered circles arranged in a grid-like pattern.
+            list: List of radii of contours that are  circular.
+        """
+        # List to store radii of valid circular contours
+        valid_circle = []  
+        for cont in contours:
+            # Calculate the perimeter of the contour
+            perimeter = cv.arcLength(cont, True)  
+
+            # Calculate the area of the contour
+            area = cv.contourArea(cont)  
+            # Avoid division by zero
+            if perimeter == 0:
+                continue  
+            circularity = 4 * np.pi * (area / (perimeter ** 2))  
+            if 0.8 < circularity < 1.2:  
+                _, radius = cv.minEnclosingCircle(cont)  
+                valid_circle.append(radius)  
+        return valid_circle
+    
+    def enforce_grid_pattern(self, circles):
+        """
+        Enforces a grid pattern on the detected circles to align them with the expected well plate layout.
+        
+        Args:
+            circles (np.ndarray): Detected circles.
+        
+        Returns:
+            np.ndarray: Array of circles aligned in a grid pattern.
         """
         if circles is None or len(circles[0]) < 2:
-            return None
+            return None  
         
-        # Extract (x, y) positions only.
-        circle_positions = circles[0, :, :2]
+        # Extract (x, y, radius) positions of the circles
+        circle_positions = circles[0, :, :3]  # Include radius
         
-        # Sort circles by their y-coordinate (rows) and then by x-coordinate (columns)
-        sorted_indices = np.lexsort((circle_positions[:, 0], circle_positions[:, 1]))
-        sorted_circles = circles[0, sorted_indices]
+        # Sort circles by Y-coordinate (row-wise sorting)
+        sorted_by_y = sorted(circle_positions, key=lambda p: p[1])
         
-        # Calculate the expected number of circles
-        expected_num_circles = self.expected_grid[0] * self.expected_grid[1]
-        
-        # If more circles are detected than expected, keep only the first `expected_num_circles`
-        if len(sorted_circles) > expected_num_circles:
-            sorted_circles = sorted_circles[:expected_num_circles]
-        
+        # Group circles into rows based on proximity in Y-coordinate
+        rows = []
+        row_threshold = np.mean(np.diff(sorted_by_y, axis=0)[:, 1]) / 2  # estimate row spacing
+        current_row = [sorted_by_y[0]]
+
+        for i in range(1, len(sorted_by_y)):
+            if abs(sorted_by_y[i][1] - current_row[-1][1]) < row_threshold:
+                current_row.append(sorted_by_y[i])  # Add to current row if Y-coordinate is close
+            else:
+                rows.append(sorted(current_row, key=lambda p: p[0]))  # Sort row by X-coordinate
+                current_row = [sorted_by_y[i]]  # Start a new row
+
+        rows.append(sorted(current_row, key=lambda p: p[0]))  # Add the last row
+
+        # Flatten rows back into a single array
+        sorted_circles = np.array([circle for row in rows for circle in row])
+
+        # Limit to expected number of wells (8x12 = 96)
+        if len(sorted_circles) > self.expected_grid[0] * self.expected_grid[1]:
+            sorted_circles = sorted_circles[:self.expected_grid[0] * self.expected_grid[1]]
+
         return np.array([sorted_circles], dtype=np.uint16)
 
     def extract_rgb_values(self, circles, radius=1):
@@ -78,22 +125,45 @@ class Image_processing:
 
     def auto_hough_circle_detection(self):
         """
-        Detects circles in an image, extracts RGB values, and prints labelled results.
+        Detects circles in an image and extracts RGB values.
         
         Returns:
-            dict: Labelled RGB values for each detected well, or None if detection fails.
+            np.ndarray: Array of RGB values for each detected circle, or None if detection fails.
         """
+        # Convert the image to grayscale
         gray = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
-        gray = cv.equalizeHist(gray)
+        
+        # Apply Contrast Limited Adaptive Histogram Equalization (CLAHE) to enhance contrast
+        clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        gray = clahe.apply(gray)
+        
+        # Apply median blur to reduce noise
         blurred = cv.medianBlur(gray, 5)
         
+        # Detect edges using the Canny edge detector
+        edges = cv.Canny(blurred, 50, 150)
+
+        # Find contours in the edge-detected image
+        contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+        if not contours:
+            print("No contours found. Check image quality.")
+            return None
+
+        # Filter circular contours only
+        valid_circle = self.filter_circular_contours(contours)
+
+        if len(valid_circle) < 5:
+            print("Not enough valid circles detected from contours.")
+            return None
+
         # Controls threshold for detecting circles and is adjusted to optimise detection.
         param2 = 50
         best_circles = None
         
         # Loop progressively lowers param2 to increase sensitivity
         while param2 >= 10:
-            # Circle detection using hough circles
+            # Circle detection using Hough Circles
             circles = cv.HoughCircles(
                 blurred, 
                 cv.HOUGH_GRADIENT, 
@@ -101,7 +171,7 @@ class Image_processing:
                 minDist=15,  
                 param1=50, 
                 param2=param2,  
-                minRadius=20, 
+                minRadius=15, 
                 maxRadius=25
             )
 
@@ -111,27 +181,15 @@ class Image_processing:
                 break  
             param2 -= 5  
         
-        # If it works, use enforce grid to remove outliers --> align to 96 well plate
+        # If circles are detected, enforce grid pattern to remove outliers
         if best_circles is not None:
             best_circles = self.enforce_grid_pattern(best_circles)
             if best_circles is not None:
                 rgb_values = self.extract_rgb_values(best_circles)
-                circle_positions = best_circles[0, :, :2]
+                self.best_circles = best_circles
                 
-                # Sort wells by their positions (top-left to bottom-right order)
-                sorted_indices = np.lexsort((circle_positions[:, 0], circle_positions[:, 1]))
-                sorted_circles = best_circles[0, sorted_indices]
-                
-                # Assign well labels
-                well_labels = [f"W{i + 1}" for i in range(self.expected_grid[0] * self.expected_grid[1])]
-                self.labelled_rgb_values = dict(zip(well_labels, rgb_values[sorted_indices]))
-                self.best_circles = sorted_circles
-                
-                # Print labelled RGB values
-                print("Labelled RGB Values:")
-                for well, rgb in self.labelled_rgb_values.items():
-                
-                    return self.labelled_rgb_values
+                # Return the array of RGB values
+                return rgb_values
     
         print("Circle detection failed.")
         return None
@@ -139,30 +197,22 @@ class Image_processing:
     def plot_picture(self):
         """
         Plots the image with detected circles and labels.
-
+        
         Returns:
             None: Displays the image using matplotlib.
         """
         if self.best_circles is not None:
             image = self.image.copy()
-            for idx, circle in enumerate(self.best_circles):
+            for idx, circle in enumerate(self.best_circles[0, :]):
                 center = (circle[0], circle[1])
                 radius = circle[2]
-                cv.circle(image, center, radius, (0, 255, 0), 2)
-                cv.circle(image, center, 5, (0, 0, 255), -1)  # Red bullseye
+                cv.circle(image, center, radius, (0, 255, 0), 2)  # Draw green circle
+                cv.circle(image, center, 5, (0, 0, 255), -1)  # Draw red bullseye
                 cv.putText(image, f"W{idx + 1}", (center[0] - 10, center[1] + 5), 
-                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)  # Label the circle
             
             # Display result
             plt.figure(figsize=(10, 10))
             plt.imshow(cv.cvtColor(image, cv.COLOR_BGR2RGB))
             plt.axis('off')
             plt.show()
-                
-
-
-    
-
-    
-
-

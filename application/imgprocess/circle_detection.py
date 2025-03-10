@@ -107,9 +107,13 @@ class Image_processing:
         # Flatten corrected rows back into a single array
         sorted_circles = np.array([circle for row in corrected_rows for circle in row])
 
+        length_rows = [len(row) for rows]
+        t = np.sum(length_rows)
+        sorted_circles = np.array([circle for row in rows if len(row) >= self.expected_grid[1] for circle in row])
+
         # Limit to expected number of wells (8x12 = 96)
-        if len(sorted_circles) > self.expected_grid[0] * self.expected_grid[1]:
-            sorted_circles = sorted_circles[:self.expected_grid[0] * self.expected_grid[1]]
+        #if len(sorted_circles) > self.expected_grid[0] * self.expected_grid[1]:
+         #   sorted_circles = sorted_circles[:self.expected_grid[0] * self.expected_grid[1]]
 
         return np.array([sorted_circles], dtype=np.float32)
 
@@ -147,7 +151,7 @@ class Image_processing:
             # Compute mean RGB value
             rgb /= count  
             rgb_values.append(rgb.astype(int))
-        
+        rgb_values = np.array(rgb_values).reshape((self.expected_grid[0], self.expected_grid[1], 3))
         return np.array(rgb_values)
 
     def auto_hough_circle_detection(self):

@@ -4,24 +4,40 @@ from opentrons import protocol_api
 import numpy as np
 
 
-def generate_script(iter_n, volume):
+def generate_script(iter_count, volume, well_loc, total_volume):
+    '''
+    Generates an opentrons script for one iteration
+
+    params:
+        iter_count (int): 
+            the current iteration number the program is on, used for calculating which wells to pippette into
+        volume (ndarray): 
+            array containing volume of each liquid in uL. 
+            row size = iteration count
+            column size = number of liquids
+        well_loc (int):
+            Position of the well plate in the OT2. Default: 5 (the middle of the robot).
+        total_volume (float):
+            Total volume to be pipetted in each well. Default: 150uL.
+    '''
+
+    #This is used so that it works with .npy files, might need to be changed if we call this function from wellplate_classes
     array_str = np.array2string(volume, separator = ', '.replace('\n', ''))
     code_template = f'''
 from opentrons import protocol_api
 import numpy as np
 
-#creates array with volumes, in future this will come from the optimisation program
-#volume = np.array([[20.0, 30.0, 40.0] for i in range(14)])
-
 requirements = {{"robotType": "OT-2", "apiLevel": "2.16"}}
 
 def run(protocol: protocol_api.ProtocolContext):
 
-    iter_n = {iter_n}
+    iter_count = {iter_count}
     volume = np.array({array_str})
 
-    #need to have some way for the user to select labware type and number
-    well_loc = 5
+    total_volume = {total_volume}
+
+    #location selected by user when wellplate class created
+    well_loc = {well_loc}
 
     #concentrations used must come in a num of wells x num of liquids size array
     iter_size = volume.shape[0]
@@ -29,8 +45,8 @@ def run(protocol: protocol_api.ProtocolContext):
 
     #calculate which row and col to start on depending on iteration size and number
     #assuming 96 wells, making 12 a variable could change this
-    start_row = (iter_size * iter_n) // 12
-    start_col = (iter_size * iter_n) % 12
+    start_row = (iter_size * iter_count) // 12
+    start_col = (iter_size * iter_count) % 12
 
     #loading the tips, reservoir and well plate into the program
     tips = protocol.load_labware("opentrons_96_tiprack_300ul", 1)
@@ -41,7 +57,7 @@ def run(protocol: protocol_api.ProtocolContext):
     row = plate.rows()
 
     #Adds water so that it fills up to the same volume each time
-    buffer = 150 - np.sum(volume, axis = 1)
+    buffer = total_volume - np.sum(volume, axis = 1)
     #water will now be the first liquid to be added
     volume = np.hstack([buffer.reshape(-1,1), volume])
 
@@ -68,12 +84,11 @@ def run(protocol: protocol_api.ProtocolContext):
 '''
     with open('generated_script.py', 'w') as file:
         file.write(code_template)
-
-iter_n = int(open('./data/iter_count.txt').read())
+'''
+iter_count = int(open('./data/iter_count.txt').read())
 volume = np.load('./data/values.npy')
 
-generate_script(iter_n, volume)
-
-
+generate_script(iter_count, volume)
+'''
 
 

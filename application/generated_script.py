@@ -2,28 +2,27 @@
 from opentrons import protocol_api
 import numpy as np
 
-#creates array with volumes, in future this will come from the optimisation program
-#volume = np.array([[20.0, 30.0, 40.0] for i in range(14)])
-
 requirements = {"robotType": "OT-2", "apiLevel": "2.16"}
 
 def run(protocol: protocol_api.ProtocolContext):
 
-    iter_n = 7
-    volume = np.array([[32.27928945, 15.31411936, 14.32297021],
- [29.91591755, 18.38420229, 11.75526386],
- [28.55523819, 16.9928687 , 12.32607531],
- [31.02684205, 18.89839121, 14.90423154],
- [28.47081224, 18.91068978, 12.45424157],
- [27.34710928, 19.11241488, 17.6542183 ],
- [30.35384543, 17.94747343, 11.28707793],
- [28.23056294, 17.16285103, 12.93696837],
- [31.79585052, 19.00137705, 12.91314399],
- [30.36779772, 20.89957326, 12.27255246],
- [30.74312183, 20.0929996 , 14.72100424],
- [30.61725902, 16.55086064, 13.17730137]])
+    iter_count = 7
+    volume = np.array([[29.76736542, 25.37957633, 15.72223769],
+ [29.99290995, 24.25973718, 15.23811039],
+ [29.81482166, 24.10469473, 16.41188552],
+ [29.27962927, 22.96150055, 14.86124743],
+ [31.41511171, 25.12932117, 14.77954048],
+ [31.72858105, 24.90261097, 12.61336342],
+ [32.54986668, 21.58628161, 14.32830123],
+ [29.59585739, 24.50951308, 14.66931344],
+ [31.26780467, 24.18569784, 15.99460891],
+ [32.71292545, 26.12484091, 14.55332488],
+ [29.79981649, 22.42784613, 14.96377826],
+ [30.89079421, 22.85087132, 20.18083191]])
 
-    #need to have some way for the user to select labware type and number
+    total_volume = 150.0
+
+    #location selected by user when wellplate class created
     well_loc = 5
 
     #concentrations used must come in a num of wells x num of liquids size array
@@ -32,8 +31,8 @@ def run(protocol: protocol_api.ProtocolContext):
 
     #calculate which row and col to start on depending on iteration size and number
     #assuming 96 wells, making 12 a variable could change this
-    start_row = (iter_size * iter_n) // 12
-    start_col = (iter_size * iter_n) % 12
+    start_row = (iter_size * iter_count) // 12
+    start_col = (iter_size * iter_count) % 12
 
     #loading the tips, reservoir and well plate into the program
     tips = protocol.load_labware("opentrons_96_tiprack_300ul", 1)
@@ -44,7 +43,7 @@ def run(protocol: protocol_api.ProtocolContext):
     row = plate.rows()
 
     #Adds water so that it fills up to the same volume each time
-    buffer = 150 - np.sum(volume, axis = 1)
+    buffer = total_volume - np.sum(volume, axis = 1)
     #water will now be the first liquid to be added
     volume = np.hstack([buffer.reshape(-1,1), volume])
 

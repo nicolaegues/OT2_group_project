@@ -2,12 +2,25 @@ import numpy as np
 from skopt import Optimizer
 import pyswarms as ps
 
-def particle_swarm(model, search_space, iter_s, iter_n):
+def particle_swarm(model, search_space, iter_n):
+    '''
+    Performs well plate optimisation using particle swarm
+
+    Args:
+        model (Class):
+            Well plate class, from wellplate_classes
+        search_space (list):
+            A list of the search space for the algorithms.
+            formatted as [[low, high] for i in num_liquids]
+        iter_n (int):
+            Total number of iterations for the optimisation algorithm.
+    '''
 
     search_space = np.array(search_space)
     max_bound = search_space[:,1]
     min_bound = search_space[:,0]
     bounds = (min_bound, max_bound)
+    iter_s = model.iter_size
 
     #initialising swarm
     options = {'c1': 0.3, 'c2': 0.5, 'w':0.1}
@@ -18,9 +31,23 @@ def particle_swarm(model, search_space, iter_s, iter_n):
     #Perform optimization
     cost, pos = optimiser.optimize(model, iters=iter_n)
 
-def guassian_process(model, search_space, iter_s, iter_n):
+def guassian_process(model, search_space, iter_n):
+    '''
+    Performs well plate optimisation using guassian optimisation
 
-    opt = Optimizer(search_space, base_estimator='GP')
+    Args:
+        model (Class):
+            Well plate class, from wellplate_classes
+        search_space (list):
+            A list of the search space for the algorithms.
+            formatted as [[low, high] for i in num_liquids]
+        iter_n (int):
+            Total number of iterations for the optimisation algorithm.
+    '''
+
+    iter_s = model.iter_size
+
+    opt = Optimizer(search_space, base_estimator='GP', n_initial_points=iter_s)
     for i in range(iter_n):
         params = []
         for i in range(iter_s):
@@ -30,9 +57,23 @@ def guassian_process(model, search_space, iter_s, iter_n):
         for i in range(iter_s):
             opt.tell(params[i], result[i])
 
-def random_forest(model, search_space, iter_s, iter_n):
+def random_forest(model, search_space, iter_n):
+    '''
+    Performs well plate optimisation using random forest
 
-    opt = Optimizer(search_space, base_estimator='RF')
+    Args:
+        model (Class):
+            Well plate class, from wellplate_classes
+        search_space (list):
+            A list of the search space for the algorithms.
+            formatted as [[low, high] for i in num_liquids]
+        iter_n (int):
+            Total number of iterations for the optimisation algorithm.
+    '''
+
+    iter_s = model.iter_size
+
+    opt = Optimizer(search_space, base_estimator='RF', n_initial_points=iter_s)
     for i in range(iter_n):
         params = []
         for i in range(iter_s):

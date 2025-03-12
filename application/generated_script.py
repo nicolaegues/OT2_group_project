@@ -6,8 +6,11 @@ import numpy as np
 #volume = np.array([[20.0, 30.0, 40.0] for i in range(14)])
 
 requirements = {"robotType": "OT-2", "apiLevel": "2.16"}
-iter_n = 7
-volume = np.array([[32.27928945, 15.31411936, 14.32297021],
+
+def run(protocol: protocol_api.ProtocolContext):
+
+    iter_n = 7
+    volume = np.array([[32.27928945, 15.31411936, 14.32297021],
  [29.91591755, 18.38420229, 11.75526386],
  [28.55523819, 16.9928687 , 12.32607531],
  [31.02684205, 18.89839121, 14.90423154],
@@ -20,20 +23,17 @@ volume = np.array([[32.27928945, 15.31411936, 14.32297021],
  [30.74312183, 20.0929996 , 14.72100424],
  [30.61725902, 16.55086064, 13.17730137]])
 
-#need to have some way for the user to select labware type and number
-well_loc = 5
+    #need to have some way for the user to select labware type and number
+    well_loc = 5
 
-#concentrations used must come in a num of wells x num of liquids size array
-iter_size = volume.shape[0]
-num_liquids = volume.shape[1]
+    #concentrations used must come in a num of wells x num of liquids size array
+    iter_size = volume.shape[0]
+    num_liquids = volume.shape[1]
 
-#calculate which row and col to start on depending on iteration size and number
-#assuming 96 wells, making 12 a variable could change this
-start_row = (iter_size * iter_n) // 12
-start_col = (iter_size * iter_n) % 12
-
-
-def run(protocol: protocol_api.ProtocolContext):
+    #calculate which row and col to start on depending on iteration size and number
+    #assuming 96 wells, making 12 a variable could change this
+    start_row = (iter_size * iter_n) // 12
+    start_col = (iter_size * iter_n) % 12
 
     #loading the tips, reservoir and well plate into the program
     tips = protocol.load_labware("opentrons_96_tiprack_300ul", 1)
@@ -44,7 +44,6 @@ def run(protocol: protocol_api.ProtocolContext):
     row = plate.rows()
 
     #Adds water so that it fills up to the same volume each time
-    volume = np.load('./data/values.npy')
     buffer = 150 - np.sum(volume, axis = 1)
     #water will now be the first liquid to be added
     volume = np.hstack([buffer.reshape(-1,1), volume])

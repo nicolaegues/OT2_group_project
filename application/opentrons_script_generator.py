@@ -14,23 +14,23 @@ import numpy as np
 #volume = np.array([[20.0, 30.0, 40.0] for i in range(14)])
 
 requirements = {{"robotType": "OT-2", "apiLevel": "2.16"}}
-iter_n = {iter_n}
-volume = np.array({array_str})
-
-#need to have some way for the user to select labware type and number
-well_loc = 5
-
-#concentrations used must come in a num of wells x num of liquids size array
-iter_size = volume.shape[0]
-num_liquids = volume.shape[1]
-
-#calculate which row and col to start on depending on iteration size and number
-#assuming 96 wells, making 12 a variable could change this
-start_row = (iter_size * iter_n) // 12
-start_col = (iter_size * iter_n) % 12
-
 
 def run(protocol: protocol_api.ProtocolContext):
+
+    iter_n = {iter_n}
+    volume = np.array({array_str})
+
+    #need to have some way for the user to select labware type and number
+    well_loc = 5
+
+    #concentrations used must come in a num of wells x num of liquids size array
+    iter_size = volume.shape[0]
+    num_liquids = volume.shape[1]
+
+    #calculate which row and col to start on depending on iteration size and number
+    #assuming 96 wells, making 12 a variable could change this
+    start_row = (iter_size * iter_n) // 12
+    start_col = (iter_size * iter_n) % 12
 
     #loading the tips, reservoir and well plate into the program
     tips = protocol.load_labware("opentrons_96_tiprack_300ul", 1)
@@ -41,7 +41,6 @@ def run(protocol: protocol_api.ProtocolContext):
     row = plate.rows()
 
     #Adds water so that it fills up to the same volume each time
-    volume = np.load('./data/values.npy')
     buffer = 150 - np.sum(volume, axis = 1)
     #water will now be the first liquid to be added
     volume = np.hstack([buffer.reshape(-1,1), volume])

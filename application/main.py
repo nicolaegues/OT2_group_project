@@ -22,6 +22,9 @@ def main():
         ideal = np.array([30.0, 20.0, 12.0])
         values = ((params - ideal)**2).sum(axis = 1)
         return values
+    
+    #import and create image capture and colour scanning function here. If it outputs a 96 long array we can adjust how the
+    #function is called so that indexing is easy within the function
 
     #type 'Manual' in the function box to allow manual input
     model = wellplate96(auto_input, iteration_size, liquid_names)

@@ -2,28 +2,10 @@ import numpy as np
 import pandas as pd
 import os
 from opentrons_script_generator import generate_script
-import csv
 from imgprocess.circle_detection import Image_processing
 from image_capture import take_photo
 import string
 
-import opt_functions
-
-"""
-
-second wellplate to do 16 iterations instead of 8
-one simple test run script. also, record ideal color at the beginning. 
-OT2 runtime output logs
-requirements.txt file
-
-TO-DO's: 
-- initial volumes options
-- fix srcipt generation.
-
-doing the water volume calcs here, so I can store that as well. 
-also explain logic of having record_colors inside the wellplate class. 
-
-"""
 
 class wellplate96:
     '''

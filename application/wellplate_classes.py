@@ -132,7 +132,7 @@ class wellplate96:
         total_wells = self.wellplate_shape[0] *self.wellplate_shape[1]
         og_start_index = (self.iteration_count * self.wells_per_iteration) 
 
-        current_well_plate = og_start_index //(wellplate_shape[0]*wellplate_shape[1])
+        current_well_plate = og_start_index //(self.wellplate_shape[0]*self.wellplate_shape[1])
         start_index = og_start_index + current_well_plate*self.blank_row_space*self.wellplate_shape[1]
         end_index = start_index + self.wells_per_iteration
 

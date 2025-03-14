@@ -2,7 +2,7 @@ import numpy as np
 from skopt import Optimizer
 import pyswarms as ps
 
-def particle_swarm(model, search_space, iter_n):
+def particle_swarm(model, search_space, max_iterations, wells_per_iteration):
     '''
     Performs well plate optimisation using particle swarm
 
@@ -20,16 +20,16 @@ def particle_swarm(model, search_space, iter_n):
     max_bound = search_space[:,1]
     min_bound = search_space[:,0]
     bounds = (min_bound, max_bound)
-    iter_s = model.iter_size
+
 
     #initialising swarm
     options = {'c1': 0.3, 'c2': 0.5, 'w':0.1}
 
     #Call instance of PSO with bounds argument
-    optimiser = ps.single.GlobalBestPSO(n_particles=iter_s, dimensions=3, options=options, bounds=bounds)
+    optimiser = ps.single.GlobalBestPSO(n_particles=wells_per_iteration, dimensions=3, options=options, bounds=bounds)
 
     #Perform optimization
-    cost, pos = optimiser.optimize(model, iters=iter_n)
+    cost, pos = optimiser.optimize(model, iters=max_iterations)
 
 def guassian_process(model, search_space, iter_n):
     '''

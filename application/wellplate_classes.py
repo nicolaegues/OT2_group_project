@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from opentrons_script_generator import generate_script
 from imgprocess.circle_detection import Image_processing
-from image_capture import take_photo
+from image_capture.take_photo import take_photo
 import string
 
 
@@ -72,10 +72,10 @@ class wellplate96:
         input("Upload script, wait for robot, and then press any key to continue: ")
       
         if self.manual_measurement == True:
-            #measurements= self.user_input() #the mixed color RGB values
-            measurements = liquid_volumes[:, :-1]
+            measurements= self.user_input() #the mixed color RGB values
+            #measurements = liquid_volumes[:, :-1]
         else:
-            measurements = self.measure_colors(self.iteration_count)
+            measurements = self.measure_colors()
         
         errors = self.objective_function(measurements)
 
@@ -174,10 +174,10 @@ class wellplate96:
         # well_id = self.iteration_count % total_wells
 
         os.makedirs(f"{self.exp_data_dir}/captured_images", exist_ok=True)
-        filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count})"
-        image = take_photo(filename)
+        filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count}"
+        take_photo(filename)
 
-        processor = Image_processing(image)
+        processor = Image_processing(filename)
         rgb_values = processor.auto_hough_circle_detection()
 
         #assuming rgb values are of shape (rows, cols, 3)

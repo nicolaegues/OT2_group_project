@@ -2,14 +2,36 @@ import numpy as np
 import pandas as pd
 import os
 from opentrons_script_generator import generate_script
+import csv
+from imgprocess.circle_detection import Image_processing
+from image_capture import take_photo
+import string
+
+import opt_functions
+
+"""
+
+second wellplate to do 16 iterations instead of 8
+one simple test run script. also, record ideal color at the beginning. 
+OT2 runtime output logs
+requirements.txt file
+
+TO-DO's: 
+- initial volumes options
+- fix srcipt generation.
+
+doing the water volume calcs here, so I can store that as well. 
+also explain logic of having record_colors inside the wellplate class. 
+
+"""
 
 class wellplate96:
     '''
     A class to use the 96 well plate with optimisation algorithms.
 
     Args:
-        function (function):
-            The function that takes the volumes for each liquid in each well plate, and returns a single number for each well.
+        objective_function (objective_function):
+            The objective function that takes the volumes for each liquid in each well plate, and returns a single number (error) for each well.
             The return is the number to be minimized.
         iter_size (int):
             How many wells are used in each iteration.
@@ -36,66 +58,150 @@ class wellplate96:
             How many wells are used in each iteration.
         
     '''
-    def __init__(self, function, iter_size, liquid_names, well_loc = 5, total_volume = 150.0):
+    def __init__(self, objective_function, exp_data_dir, wellplate_shape, wells_per_iteration, manual_measurement, liquid_names, measurement_parameter_names, well_locs, total_volume):
+
+        self.objective_function = objective_function
+        self.exp_data_dir = exp_data_dir
+        self.wellplate_shape = wellplate_shape
         self.iteration_count = 0  # Initialize counter
         self.num_liquids = len(liquid_names)
-        index = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-        self.output = pd.DataFrame(data = np.zeros([8, 12*self.num_liquids]), index = index)
-        self.output.columns = pd.MultiIndex.from_product([np.arange(1, 13), liquid_names])
-        self.input = pd.DataFrame(data = np.zeros([8, 12]), index = index, columns = np.arange(1,13))
-        self.iter_size = iter_size
-        #define which function you want, user input or colour mixing function
-        self.function = function
-        if function == 'Manual':
-            self.manual_input = True
-        else: self.manual_input = False
-        self.well_loc = well_loc
+        self.measurement_parameter_names = measurement_parameter_names
+        self.num_measurement_parameters= len(measurement_parameter_names)
+        self.wells_per_iteration = wells_per_iteration
+        self.liquid_names = liquid_names
+        self.manual_measurement = manual_measurement #boolean
+        self.well_locs = well_locs
+        self.nr_wellplates = len(well_locs)
         self.total_volume = total_volume
+        self.blank_row_space = 5
 
-    def __call__(self, params):
-        #calculates start and end index
-        start_index = (self.iteration_count * self.iter_size)
-        end_index = start_index + self.iter_size
+        self.liquid_volume_df, self.measurements_df, self.error_df,self.all_data_df = self.init_dataframes()
 
-        #saves output parameter to csv
-        self.output.values.reshape(96*self.num_liquids)[start_index*self.num_liquids:end_index*self.num_liquids] = params.reshape(self.iter_size*self.num_liquids)
-        self.output.to_csv('./data/output.csv')
 
-        #We will not need to save these if we are uploading the script one at a time
-        with open('./data/iter_count.txt', 'w') as file:
-            file.write(str(self.iteration_count))
-        np.save('./data/values.npy', params)
+    def __call__(self, liquid_volumes):
 
-        #function to pippette goes here
-        #os.system('opentrons_simulate opentrons_script.py')
-        generate_script(self.iteration_count, params, self.well_loc, self.total_volume)
-        print("Upload script, wait for robot and then press any key to continue")
-        input()
-
-        if self.manual_input == True:
-            values = self.user_input(params, self.input, self.iteration_count)
+        #Adds water so that it fills up to the same volume each time
+        water_vol = self.total_volume - np.sum(liquid_volumes, axis = 1)
+        #water will now be the first liquid to be added
+        liquid_volumes = np.hstack([water_vol.reshape(-1,1), liquid_volumes])
+   
+        filepath = f"{self.exp_data_dir}/generated_script.py"
+        generate_script(filepath, self.iteration_count, self.wells_per_iteration, liquid_volumes, self.well_locs)
+        input("Upload script, wait for robot, and then press any key to continue: ")
+      
+        if self.manual_measurement == True:
+            #measurements= self.user_input() #the mixed color RGB values
+            measurements = liquid_volumes[:, :-1]
         else:
-            values = self.function(params)
-            self.input.values.reshape(96)[start_index:end_index] = values
-            self.input.to_csv('./data/input.csv')
+            measurements = self.measure_colors(self.iteration_count)
+        
+        errors = self.objective_function(measurements)
+
+        self.store_data(liquid_volumes, measurements, errors)
 
         self.iteration_count += 1
-        return values
+
+        return errors
     
-    def user_input(self, params, df, iter_c):
-        iter_s = params.shape[0]
-        #handles input dataframe
-        #for colour mixing 
-        start_index = iter_c * iter_s
-        #saves dataframe to file
-        df.to_csv('./data/input.csv')
-        print('Input values into input.csv')
-        print("Press any key to continue")
-        inp = input()
-        while inp != 'yes':
-            inp = input()
-        df2 = pd.read_csv('./data/input.csv', index_col = [0], header = [0], dtype=np.double)
-        values = df2.values.reshape(96)[start_index:start_index+iter_s]
-        return values
     
+    def init_dataframes(self):
+
+        wellplate_nr_rows = self.wellplate_shape[0]
+        wellplate_nr_columns = self.wellplate_shape[1]
+
+        wellplate_index = [string.ascii_uppercase[i % 26] for i in range(self.wellplate_shape[0])] #['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+        wellplate_index = []
+
+        for i in range(self.nr_wellplates):
+            wellplate_rows = [string.ascii_uppercase[i % 26] for i in range(wellplate_nr_rows)]
+            
+            if i != self.nr_wellplates - 1:
+                wellplate_index.extend(wellplate_rows + [""] * self.blank_row_space)
+            else:
+                wellplate_index.extend(wellplate_rows)
+
+        liquid_columns = pd.MultiIndex.from_product([np.arange(1, wellplate_nr_columns+1), self.liquid_names])
+        measurement_columns = pd.MultiIndex.from_product([np.arange(1, wellplate_nr_columns+1), self.measurement_parameter_names])
+        all_data_columns = ["iteration_number"] + [f"vol_{liquid_name}" for liquid_name in self.liquid_names] + self.measurement_parameter_names + ["error"]
+        error_columns = np.arange(1, wellplate_nr_columns+1)
+
+        total_rows = self.nr_wellplates*wellplate_nr_rows+(self.blank_row_space*(self.nr_wellplates -1))
+        
+        def create_csv(filename, shape, index = None, columns= None):
+            filepath = f"{self.exp_data_dir}/{filename}.csv"
+
+            df = pd.DataFrame(data=np.zeros(shape), index=index, columns=columns)
+            df.to_csv(filepath)
+            return df
+        
+        
+        liquid_volume_df = create_csv("liquid_volumes", (total_rows, wellplate_nr_columns * self.num_liquids), wellplate_index, liquid_columns)
+        errors_df = create_csv("errors", (total_rows, wellplate_nr_columns), wellplate_index, error_columns)
+        measurements_df = create_csv("measurements", (total_rows, wellplate_nr_columns * self.num_measurement_parameters), wellplate_index, measurement_columns)
+        all_data_df = create_csv("all_data", (self.nr_wellplates*wellplate_nr_rows*wellplate_nr_columns, len(all_data_columns)), columns = all_data_columns )
+
+        return liquid_volume_df, measurements_df, errors_df, all_data_df
+    
+    
+    def store_data(self, liquid_volumes, measurements, errors):
+
+
+        #handling cases where the wells_per_iterations do not exactly equal one row. 
+        total_wells = self.wellplate_shape[0] *self.wellplate_shape[1]
+        og_start_index = (self.iteration_count * self.wells_per_iteration) 
+
+        current_well_plate = og_start_index //(wellplate_shape[0]*wellplate_shape[1])
+        start_index = og_start_index + current_well_plate*self.blank_row_space*self.wellplate_shape[1]
+        end_index = start_index + self.wells_per_iteration
+
+        self.liquid_volume_df.values.reshape(self.liquid_volume_df.size)[start_index*self.num_liquids:end_index*self.num_liquids] = liquid_volumes.flatten()
+        self.liquid_volume_df.to_csv(f"{self.exp_data_dir}/liquid_volumes.csv")
+
+        
+        self.error_df.values.reshape(self.error_df.size)[start_index:end_index] = errors
+        self.error_df.to_csv(f"{self.exp_data_dir}/errors.csv")
+
+
+        if self.manual_measurement == False: 
+            self.measurements_df.values.reshape(self.nr_wellplates* total_wells*self.num_liquids + self.blank_row_space)[(start_index )* self.num_liquids:end_index * self.num_liquids] = measurements.flatten()
+            self.measurements_df.to_csv(f"{self.exp_data_dir}/measurements.csv")
+
+
+        iteration_idx = np.full((self.wellplate_shape[1], 1), self.iteration_count+1)
+        all_data = np.concatenate([iteration_idx, liquid_volumes, measurements, errors[:, np.newaxis] ], axis = 1 )
+        self.all_data_df.iloc[self.iteration_count:self.iteration_count+self.wells_per_iteration, :] = all_data
+        self.all_data_df.to_csv(f"{self.exp_data_dir}/all_data.csv")
+
+
+    def user_input(self):             
+
+        input("Open 'measurements.csv', input the measurements into the corresponding row, and press any key to continue: ")
+
+        measurements_df = pd.read_csv(f"{self.exp_data_dir}/measurements.csv")
+        measurements = measurements_df.values[self.iteration_count, :]
+
+        return measurements
+    
+    def measure_colors(self):
+
+        total_wells = self.wellplate_shape[0] *self.wellplate_shape[1]
+        start_index = (self.iteration_count * self.wells_per_iteration) % total_wells
+        end_index = start_index + self.wells_per_iteration
+        
+        
+        # well_id = self.iteration_count % total_wells
+
+        os.makedirs(f"{self.exp_data_dir}/captured_images", exist_ok=True)
+        filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count})"
+        image = take_photo(filename)
+
+        processor = Image_processing(image)
+        rgb_values = processor.auto_hough_circle_detection()
+
+        #assuming rgb values are of shape (rows, cols, 3)
+        letter_colors = rgb_values.flatten()[start_index*self.num_liquids:end_index*self.num_liquids]
+
+
+        return letter_colors
+
 

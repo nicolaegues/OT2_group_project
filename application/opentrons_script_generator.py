@@ -4,7 +4,7 @@ from opentrons import protocol_api
 import numpy as np
 
 
-def generate_script(iter_count, volume, well_loc, total_volume):
+def generate_script(filepath, iter_count, wells_per_iteration, liquid_volumes, well_locs):
     '''
     Generates an opentrons script for one iteration
 
@@ -22,7 +22,7 @@ def generate_script(iter_count, volume, well_loc, total_volume):
     '''
 
     #This is used so that it works with .npy files, might need to be changed if we call this function from wellplate_classes
-    array_str = np.array2string(volume, separator = ', '.replace('\n', ''))
+    array_str = np.array2string(liquid_volumes, separator = ', '.replace('\n', ''))
     code_template = f'''
 from opentrons import protocol_api
 import numpy as np
@@ -31,58 +31,74 @@ requirements = {{"robotType": "OT-2", "apiLevel": "2.16"}}
 
 def run(protocol: protocol_api.ProtocolContext):
 
-    iter_count = {iter_count}
-    volume = np.array({array_str})
-
-    total_volume = {total_volume}
+    iteration_count = {iter_count}
+    wells_per_iteration = {wells_per_iteration}
+    volumes = np.array({array_str})
 
     #location selected by user when wellplate class created
-    well_loc = {well_loc}
+    well_locs = {well_locs}
 
     #concentrations used must come in a num of wells x num of liquids size array
-    iter_size = volume.shape[0]
-    num_liquids = volume.shape[1]
+    iter_size = volumes.shape[0]
+    num_liquids = volumes.shape[1]
 
-    #calculate which row and col to start on depending on iteration size and number
-    #assuming 96 wells, making 12 a variable could change this
-    start_row = (iter_size * iter_count) // 12
-    start_col = (iter_size * iter_count) % 12
+    if 1 not in protocol.deck or protocol.deck[1] is None:
+        #loading the tips, reservoir and well plate into the program
+        tips = protocol.load_labware("opentrons_96_tiprack_300ul", 1)
+        reservoir = protocol.load_labware("nest_12_reservoir_15ml", 2)
+        
+        plates = {{}}
+        for idx, loc in enumerate(well_locs):
+            plates[f"plate_{{idx+1}}"] = protocol.load_labware("nest_96_wellplate_200ul_flat", loc)
+        
+        left_pipette = protocol.load_instrument("p300_single_gen2", "right", tip_racks=[tips])
+    
+    else:
+        #retrieve existing labware
+        tips = protocol.deck[1]
+        reservoir = protocol.deck[2]
+        plates = {{f"plate_{{idx+1}}": protocol.deck[loc] for idx, loc in enumerate(well_locs)}}
+        left_pipette = protocol.loaded_instruments["right"]
 
-    #loading the tips, reservoir and well plate into the program
-    tips = protocol.load_labware("opentrons_96_tiprack_300ul", 1)
-    reservoir = protocol.load_labware("nest_12_reservoir_15ml", 2)
-    #well plate in the middle for optimal camera placement, in future let user select
-    plate = protocol.load_labware("nest_96_wellplate_200ul_flat", well_loc)
-    left_pipette = protocol.load_instrument("p300_single_gen2", "right", tip_racks=[tips])
-    row = plate.rows()
+    start_index = (iteration_count * wells_per_iteration) 
+    current_plate_idx = start_index // 96
+    plate = plates[f"plate_{{current_plate_idx+1}}"]  # Get the correct plate
+    print(f"plate_{{current_plate_idx+1}}")
 
-    #Adds water so that it fills up to the same volume each time
-    buffer = total_volume - np.sum(volume, axis = 1)
-    #water will now be the first liquid to be added
-    volume = np.hstack([buffer.reshape(-1,1), volume])
+    well_count = iteration_count - current_plate_idx*8
 
-    for i in range(num_liquids+1):
-        if i != num_liquids - 1:
-            left_pipette.pick_up_tip()
-        amt = volume[:, i]
-        for j in range(iter_size):
-            #calculates current column and row to pipette into
-            current_col = (start_col + j) % 12
-            current_row = start_row + (start_col + j) // 12
+    target_wells = []
+    for liquid in range(num_liquids): 
 
-            #transfers X amount of liquid i into the well
-            if i != num_liquids - 1:
-                left_pipette.transfer(amt[j], reservoir[f'A{{i+1}}'], row[current_row][current_col], new_tip = 'never')
-            #if it is on the last liquid, it mixes the well
-            else:
-                left_pipette.pick_up_tip()
-                left_pipette.transfer(amt[j], reservoir[f'A{{i+1}}'], row[current_row][current_col], mix_after = (2,20), new_tip = 'never')
-                left_pipette.drop_tip()
-        if i != num_liquids - 1:
-            left_pipette.drop_tip()
+        left_pipette.pick_up_tip() #one tip for each dye-distribution into all the wells. then a new tip for another color distribution into all the wells. 
+
+        for well, volume_set in enumerate(volumes):
+
+            #multiplying by factor of 8: this way we first fill A1 - A12, then B1-B12. instead of A1-H1, then A2-H2.... 
+            well_index = well * 8 + well_count
+
+            target_well = plate.wells()[well_index] 
+            target_wells.append(target_well)
+
+            
+            liquid_volume = volume_set[liquid]
+            liquid_source = reservoir[f'A{{liquid+1}}']
+
+            #if liquid != num_liquids - 1:
+            left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never" )
+
+        #bin the tip
+        left_pipette.drop_tip()
+
+        
+    left_pipette.pick_up_tip()
+    for well in target_wells:
+        left_pipette.mix(3, 20, well)
+    left_pipette.drop_tip()
+                
 
 '''
-    with open('generated_script.py', 'w') as file:
+    with open(filepath, 'w') as file:
         file.write(code_template)
 '''
 iter_count = int(open('./data/iter_count.txt').read())

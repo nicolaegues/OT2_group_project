@@ -1,7 +1,11 @@
 import cv2
+import numpy as np
+import os
+
 
 def select_crop_region():
     """can manually select a region of interest and retake"""
+
     global start_x, start_y, end_x, end_y, cropping, crop_selected, frame
 
     # initial cropping variables
@@ -34,13 +38,15 @@ def select_crop_region():
             cropping = False
             crop_selected = True
 
-    #opens webcam so we can manually crop selection
-    webcam = cv2.VideoCapture(0)
-    cv2.namedWindow("Select Crop Area")
-    cv2.setMouseCallback("Select Crop Area", mouse_callback)
-
    #display webcam for crop select
+   #opens webcam so we can manually crop selection
+    webcam = cv2.VideoCapture(0)
+  
     while True:
+
+        cv2.namedWindow("Select Crop Area")
+        cv2.setMouseCallback("Select Crop Area", mouse_callback)
+
         ret, frame = webcam.read()
         if not ret:
             print("Error: Could not access webcam.")
@@ -49,43 +55,29 @@ def select_crop_region():
         cv2.imshow("Select Crop Area", frame)
         key = cv2.waitKey(1) & 0xFF
 
+
         if crop_selected:
-            cv2.destroyAllWindows()
-            # exit loop when selection is made
-            break
-
-    webcam.release()
-
-    # asks for confirmation if cropped
-    if crop_selected:
-        while True:
-            # Show the selected crop for confirmation
-            webcam = cv2.VideoCapture(0)
-            ret, frame = webcam.read()
-            webcam.release()
-            if not ret:
-                print("Error: Could not capture image.")
-                return None
-
+            cv2.destroyAllWindows() 
+            
             # Display cropped preview
             cropped_frame = frame[start_y:end_y, start_x:end_x]
             cv2.imshow("Cropped Preview", cropped_frame)
-            print("Press 'Y' to confirm crop or 'N' to reselect.")
+            key = cv2.waitKey(1) & 0xFF
 
-            # Wait for user input
-            key = cv2.waitKey(0) & 0xFF  
-            cv2.destroyAllWindows()
+            answer = input("Happy with the crop? [y/n] ")
 
-            # y = accept crop  n= retake. Must use ord as waitkey returns int
-            if key == ord('y'):
+            cv2.destroyAllWindows() 
+
+            if answer == "y": 
+                np.save("crop_coords.npy", np.array([start_x, start_y, end_x, end_y]))
                 return (start_x, start_y, end_x, end_y) 
-            elif key == ord('n'):
+            
+            else: 
                 print("Reselecting crop region...")
-                return select_crop_region() 
+                crop_selected = False
+                
+
              
-    # If no selection was made
-    else:
-        return None  
 
 def take_photo(cropped_region, photo_count=1):
     """Captures a cropped photo using the stored coordinates."""
@@ -111,14 +103,11 @@ def take_photo(cropped_region, photo_count=1):
 
 
 ########################################################################
-# Example test ... 
 
 if __name__ == "__main__":
     cropped_region = select_crop_region()
     if cropped_region:
         print(f"Cropped Region Selected: {cropped_region}")
-
-        # test on three photos .. 
-        for i in range(3):
-            take_photo(cropped_region, photo_count=i+1)
+    
+        take_photo(cropped_region, photo_count=1)
 

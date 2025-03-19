@@ -1,5 +1,7 @@
 import cv2
-def take_photo(file = 'image.jpg', camera = 0):
+import numpy as np
+
+def take_photo(file = 'image.jpg', camera = 0, crop_coords_file = None):
     '''
     Function to take photo from computer webcam.
     Saves image to the same directory as the instance of python.
@@ -10,5 +12,18 @@ def take_photo(file = 'image.jpg', camera = 0):
     '''
     webcam = cv2.VideoCapture(camera)
     check, frame = webcam.read()
-    cv2.imwrite(filename=file, img=frame)
     webcam.release()
+
+    if not check:
+        print("Error: Could not capture image.")
+        return
+
+    if crop_coords_file is not None:
+        #extract cropped co-ordinates and apply to image taken
+        cropped_region = np.load(crop_coords_file)
+        start_x, start_y, end_x, end_y = cropped_region
+        cropped_frame = frame[start_y:end_y, start_x:end_x]
+        frame = cropped_frame
+
+
+    cv2.imwrite(filename=file, img=frame)

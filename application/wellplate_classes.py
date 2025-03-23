@@ -6,6 +6,8 @@ from imgprocess.circle_detection import Image_processing
 from image_capture.take_photo import take_photo
 import string
 
+from imgprocess.planB import PlanB_Image_Processing
+
 
 class wellplate96:
     """
@@ -224,8 +226,22 @@ class wellplate96:
 
         filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count}"
         take_photo(filename)
+
         processor = Image_processing(filename)
         rgb_values = processor.auto_hough_circle_detection()
+
+        planB_processor = PlanB_Image_Processing(filename)
+        rgb_values = planB_processor.run()
+        
+        # if rgb_values == None:
+        #     print("Detection method failed. Using different method:")
+            
+        # else: 
+        #     processor.plot_picture()
+        #     answer = input("Happy with the result? If not, a different method will be used: [y/n] ")
+        #     if answer.lower() == "n":
+        #         rgb_values = planB_processor.run()
+
 
         #to check the script works without the robot/actual data, uncomment the line below and comment out the 4 lines above. 
         #rgb_values = np.random.rand(self.wellplate_shape[0], self.wellplate_shape[1], 3)

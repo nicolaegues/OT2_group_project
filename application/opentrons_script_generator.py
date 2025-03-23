@@ -92,26 +92,22 @@ def run(protocol: protocol_api.ProtocolContext):
             liquid_volume = volume_set[liquid]
             liquid_source = reservoir[f'A{{liquid+1}}']
 
-            #if liquid != num_liquids - 1:
-            left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never" )
+            if liquid != num_liquids - 1:
+                left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never")
+            else: 
+                left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never", mix_after=(3, 20 ))
 
         #bin the tip
         left_pipette.drop_tip()
 
-    for well in target_wells:
-        left_pipette.pick_up_tip()
-        left_pipette.mix(3, 20, well)
-        left_pipette.drop_tip()
+    # for well in target_wells:
+    #     left_pipette.pick_up_tip()
+    #     left_pipette.mix(3, 20, well)
+    #     left_pipette.drop_tip()
                 
 
 '''
     with open(filepath, 'w') as file:
         file.write(code_template)
-'''
-iter_count = int(open('./data/iter_count.txt').read())
-volume = np.load('./data/values.npy')
-
-generate_script(iter_count, volume)
-'''
 
 

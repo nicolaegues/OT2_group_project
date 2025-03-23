@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def take_photo(file = 'image.jpg', camera = 0, crop_coords_file = None):
+def take_photo(file = 'image.jpg', camera = 1, crop_coords_file = None):
     '''
     Function to take photo from computer webcam.
     Saves image to the same directory as the instance of python.

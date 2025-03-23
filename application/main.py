@@ -25,7 +25,7 @@ def main():
     os.makedirs(exp_data_dir, exist_ok=True)
 
     # Change this based on what you want your ideal measurement to be
-    ideal_measurement = [30.0, 30.0, 30.0] # our ideal RGB value
+    ideal_measurement = [114.8412698, 96.1111111, 37.84126984] # our ideal RGB value, taken from well A4 of test2.jpg
 
     #search space for the volumes of the liquids
     search_space = [[0.0, 30.0], [0.0, 30.0], [0.0, 30.0]]

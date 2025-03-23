@@ -40,13 +40,14 @@ def select_crop_region():
 
    #display webcam for crop select
    #opens webcam so we can manually crop selection
-    webcam = cv2.VideoCapture(0)
+    webcam = cv2.VideoCapture(1)
   
     while True:
 
-        cv2.namedWindow("Select Crop Area")
+        cv2.namedWindow("Select Crop Area", cv2.WINDOW_NORMAL)
         cv2.setMouseCallback("Select Crop Area", mouse_callback)
 
+        #frame = cv2.imread("dye_example.jpg")
         ret, frame = webcam.read()
         if not ret:
             print("Error: Could not access webcam.")
@@ -79,27 +80,35 @@ def select_crop_region():
 
              
 
-def take_photo(cropped_region, photo_count=1):
+def take_photo(cropped_region):
     """Captures a cropped photo using the stored coordinates."""
     
     #open webcam
-    webcam = cv2.VideoCapture(0)
+    webcam = cv2.VideoCapture(1)
     ret, frame = webcam.read()
-    # close after capture
+    #close after capture
     webcam.release()
 
     if not ret:
         print("Error: Could not capture image.")
         return
+    #frame = cv2.imread("dye_example.jpg")
+
 
     #extract cropped co-ordinates and apply to image taken
     start_x, start_y, end_x, end_y = cropped_region
     cropped_frame = frame[start_y:end_y, start_x:end_x]
     
     #save cropped image ---> idk rename or remove
-    filename = f"cropped_image_{photo_count}.jpg"
+    filename = f"cropped_image.jpg"
     cv2.imwrite(filename, cropped_frame)
     print(f"Photo saved as {filename}")
+
+    height, width = frame.shape[:2]
+    resized_frame = cv2.resize(cropped_frame, (width, height))
+
+    cv2.imwrite("resized_cropped_image.jpg", resized_frame)
+
 
 
 ########################################################################
@@ -109,5 +118,5 @@ if __name__ == "__main__":
     if cropped_region:
         print(f"Cropped Region Selected: {cropped_region}")
     
-        take_photo(cropped_region, photo_count=1)
+        take_photo(cropped_region)
 

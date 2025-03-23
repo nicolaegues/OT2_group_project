@@ -7,7 +7,7 @@ from imgprocess.blurry_well_detection import well_detection
 from image_capture.take_photo import take_photo
 import string
 
-#from imgprocess.planB import PlanB_Image_Processing
+from imgprocess.planB_interpolation import PlanB_Image_Processing
 
 
 class wellplate96:

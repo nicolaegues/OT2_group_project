@@ -3,10 +3,11 @@ import pandas as pd
 import os
 from opentrons_script_generator import generate_script
 from imgprocess.circle_detection import Image_processing
+from imgprocess.blurry_well_detection import well_detection
 from image_capture.take_photo import take_photo
 import string
 
-from imgprocess.planB import PlanB_Image_Processing
+from imgprocess.planB_interpolation import PlanB_Image_Processing
 
 
 class wellplate96:
@@ -50,7 +51,7 @@ class wellplate96:
         self.wellplate_locs = wellplate_locs
         self.nr_wellplates = len(wellplate_locs)
         self.total_volume = total_volume
-        self.blank_row_space = 5 #vertical space between wellplate data in CSV files (if more than one is used)
+        self.blank_row_space = 1 #vertical space between wellplate data in CSV files (if more than one is used)
 
         #Initialize dataframes for storing experimental data
         self.liquid_volume_df, self.measurements_df, self.error_df,self.all_data_df = self.init_dataframes()
@@ -91,7 +92,8 @@ class wellplate96:
         if self.manual_measurement == True:
             measurements = self.user_input() 
         else:
-            measurements = self.measure_colors()
+            #measurements = self.measure_colors()
+            measurements = self.measure_blurry_colours()
         
         errors = self.objective_function(measurements)
 
@@ -251,4 +253,30 @@ class wellplate96:
 
         return iteration_colors
 
+    def measure_blurry_colours(self):
+        """
+        Assuming the webcam is mounted to the top of the robot and ready to go, this function takes a picture of the wellplate, 
+        extracts the rgb-values of each of the wells (even if not all are filled), and returns the colors of only the wells that are part of this iteration.
+
+        """
+
+        #get the start and end-indices to index a flattened color array. When the iteration count exceeds that of only one-wellplate, take the modulus such that the correct index is found. 
+        start_index = self.iteration_count * self.wells_per_iteration * self.num_measurement_parameters
+        end_index = (start_index + self.wells_per_iteration) * self.num_measurement_parameters
+        
+        
+        os.makedirs(f"{self.exp_data_dir}/captured_images", exist_ok=True)
+
+        filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count}"
+        take_photo(filename)
+        rgb_values = well_detection(filename)
+        #rgb_values = well_detection('imgprocess/test.jpg')
+
+        #to check the script works without the robot/actual data, uncomment the line below and comment out the 4 lines above. 
+        #rgb_values = np.random.rand(self.wellplate_shape[0], self.wellplate_shape[1], 3)
+
+        iteration_colours = rgb_values.flatten()[start_index:end_index]
+        iteration_colours = iteration_colours.reshape(self.wells_per_iteration, self.num_measurement_parameters)
+
+        return iteration_colours
 

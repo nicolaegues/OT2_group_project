@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 
-def well_detection(image):
+def well_detection(filename):
     '''
     Takes an image of a well plate with coloured dyes in the well, and returns a sorted
     array of the rgb values in each well
@@ -22,14 +22,15 @@ def well_detection(image):
 
     #Sets all pixels to white if they are grey
     #Done by finding the median and checking if pixels are within a certain threshold of that median
+    image = cv.imread(filename)
     
     for i in range(np.shape(image)[0]):
         for j in range(np.shape(image)[1]):
             pixel = image[i, j]
             median = np.median(pixel)
             if np.all(median - thresh < pixel) and np.all(median + thresh > pixel):
-                #currently changes all pixels to black, white may be better
-                image[i, j] = [0, 0, 0]
+                #currently changes all pixels to white, black may be better
+                image[i, j] = [255, 255, 255]
 
     # Convert the image to grayscale
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)

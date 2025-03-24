@@ -9,7 +9,13 @@ import string
 
 from imgprocess.planB_interpolation import PlanB_Image_Processing
 
+"""
+image-file storing only worked when run from powershell - fix
+include error threshold to stop run
+fix different nr of wells_per_iteration
+store and import previous optimisation data (to not have to repeat runs)
 
+"""
 class wellplate96:
     """
     A class to use the 96 well plate with optimisation algorithms.
@@ -93,7 +99,7 @@ class wellplate96:
             measurements = self.user_input() 
         else:
             #measurements = self.measure_colors()
-            measurements = self.measure_blurry_colours()
+            measurements = self.measure_colours()
         
         errors = self.objective_function(measurements)
 
@@ -220,8 +226,8 @@ class wellplate96:
 
         #get the start and end-indices to index a flattened color array. When the iteration count exceeds that of only one-wellplate, take the modulus such that the correct index is found. 
         total_wells = self.wellplate_shape[0] *self.wellplate_shape[1]
-        start_index = (self.iteration_count * self.wells_per_iteration) % total_wells
-        end_index = start_index + self.wells_per_iteration
+        start_index = ((self.iteration_count * self.wells_per_iteration) % total_wells)*self.num_measurement_parameters
+        end_index = start_index + self.wells_per_iteration*self.num_measurement_parameters
         
         
         os.makedirs(f"{self.exp_data_dir}/captured_images", exist_ok=True)
@@ -229,54 +235,25 @@ class wellplate96:
         filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count}"
         take_photo(filename)
 
-        processor = Image_processing(filename)
-        rgb_values = processor.auto_hough_circle_detection()
 
         planB_processor = PlanB_Image_Processing(filename)
         rgb_values = planB_processor.run()
+
+        #Seb's automatic version
+        #rgb_values = well_detection(filename)
         
-        # if rgb_values == None:
-        #     print("Detection method failed. Using different method:")
-            
-        # else: 
-        #     processor.plot_picture()
-        #     answer = input("Happy with the result? If not, a different method will be used: [y/n] ")
-        #     if answer.lower() == "n":
-        #         rgb_values = planB_processor.run()
+        #Hodan's version
+        # processor = Image_processing(filename)
+        # rgb_values = processor.auto_hough_circle_detection()
 
 
         #to check the script works without the robot/actual data, uncomment the line below and comment out the 4 lines above. 
         #rgb_values = np.random.rand(self.wellplate_shape[0], self.wellplate_shape[1], 3)
 
-        iteration_colors = rgb_values.flatten()[start_index*self.num_measurement_parameters:end_index*self.num_measurement_parameters]
+        iteration_colors = rgb_values.flatten()[start_index:end_index]
         iteration_colors = iteration_colors.reshape(self.wells_per_iteration, self.num_measurement_parameters)
 
         return iteration_colors
 
-    def measure_blurry_colours(self):
-        """
-        Assuming the webcam is mounted to the top of the robot and ready to go, this function takes a picture of the wellplate, 
-        extracts the rgb-values of each of the wells (even if not all are filled), and returns the colors of only the wells that are part of this iteration.
 
-        """
-
-        #get the start and end-indices to index a flattened color array. When the iteration count exceeds that of only one-wellplate, take the modulus such that the correct index is found. 
-        start_index = self.iteration_count * self.wells_per_iteration * self.num_measurement_parameters
-        end_index = (start_index + self.wells_per_iteration) * self.num_measurement_parameters
-        
-        
-        os.makedirs(f"{self.exp_data_dir}/captured_images", exist_ok=True)
-
-        filename = f"{self.exp_data_dir}/captured_images/image_iteration_{self.iteration_count}"
-        take_photo(filename)
-        rgb_values = well_detection(filename)
-        #rgb_values = well_detection('imgprocess/test.jpg')
-
-        #to check the script works without the robot/actual data, uncomment the line below and comment out the 4 lines above. 
-        #rgb_values = np.random.rand(self.wellplate_shape[0], self.wellplate_shape[1], 3)
-
-        iteration_colours = rgb_values.flatten()[start_index:end_index]
-        iteration_colours = iteration_colours.reshape(self.wells_per_iteration, self.num_measurement_parameters)
-
-        return iteration_colours
 

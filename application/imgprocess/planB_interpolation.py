@@ -58,6 +58,7 @@ class PlanB_Image_Processing:
     def run(self):
         """Displays the image and allows user interaction to define the grid"""
         while True:
+            self.clicked_points = []
             self.fig, self.ax = plt.subplots()
             self.ax.imshow(self.image)
             self.fig.canvas.mpl_connect('button_press_event', self.on_click)

@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 import os
 from opentrons_script_generator import generate_script
-from imgprocess.circle_detection import Image_processing
-from imgprocess.blurry_well_detection import well_detection
+from image_processing.circle_detection import Image_processing
+from image_processing.blurry_well_detection import well_detection
 from image_capture.take_photo import take_photo
 import string
 
-from imgprocess.planB_interpolation import PlanB_Image_Processing
+from image_processing.planB_interpolation import PlanB_Image_Processing
 
 """
 image-file storing only worked when run from powershell - fix

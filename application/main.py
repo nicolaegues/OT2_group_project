@@ -1,5 +1,5 @@
 ##main script
-import opt_functions
+import optimisation.opt_functions
 from wellplate_classes import wellplate96
 import numpy as np
 import datetime

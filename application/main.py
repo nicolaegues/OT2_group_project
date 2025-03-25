@@ -1,6 +1,6 @@
 ##main script
 import optimisation.opt_functions
-from wellplate_classes import wellplate96
+from wellplates import wellplate96
 import numpy as np
 import datetime
 import os

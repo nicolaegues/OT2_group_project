@@ -1,17 +1,7 @@
-# Note: Ensure all team members verify the library versions they are using.
-# Versions should be added and dependencies may change as development progresses.
-
 numpy
 pandas
 opencv-python
 matplotlib
 pyswarms
-scikit-optimize  # Covers skopt imports
+scikit-optimize
 opentrons
-
-# The following standard libraries are built-in and do not require installation via pip:
-# os
-# subprocess
-# sys
-
-

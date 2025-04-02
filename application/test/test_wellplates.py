@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from opentrons_script_generator import generate_script
+#from opentrons_script_generator import generate_script
 import string
 import datetime
 from optimisation import opt_functions 
@@ -93,7 +93,7 @@ class wellplate96:
    
         #path where the generated script will be stored
         filepath = f"{self.exp_data_dir}/generated_ot2_script.py"
-        generate_script(filepath, self.iteration_count, self.population_size, liquid_volumes, self.wellplate_locs)
+        #generate_script(filepath, self.iteration_count, self.population_size, liquid_volumes, self.wellplate_locs)
         
         input("Upload script, wait for robot, and then press any key to continue: ")
       

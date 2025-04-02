@@ -25,5 +25,4 @@ def take_photo(file = 'image.jpg', camera = 1, crop_coords_file = None):
         cropped_frame = frame[start_y:end_y, start_x:end_x]
         frame = cropped_frame
 
-
     cv2.imwrite(filename=file, img=frame)

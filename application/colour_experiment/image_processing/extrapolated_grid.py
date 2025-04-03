@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.backend_bases import MouseEvent
 
 
-class PlanB_Image_Processing:
+class ExtrapolatedGrid:
     def __init__(self, image_path):
         self.image = plt.imread(image_path)
         self.clicked_points = []
@@ -74,6 +74,6 @@ class PlanB_Image_Processing:
 # Example usage inside the script
 if __name__ == "__main__":
     image_path = "C:/Users/nicol/OneDrive - University of Bristol/OT2_group_project/application/image_capture/Screenshot 2025-03-20 104037.png"
-    analyzer = PlanB_Image_Processing(image_path)
+    analyzer = ExtrapolatedGrid(image_path)
     final_rgb_values = analyzer.run()
     pass

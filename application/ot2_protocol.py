@@ -1,5 +1,4 @@
 import numpy as np
-from opentrons import protocol_api
 
 """
 - need to think about whether we want a deeper wellplate for better mixing of the colors. I have a picture of the alterantive - only issue is that it is squared. 

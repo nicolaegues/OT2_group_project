@@ -1,6 +1,6 @@
 ##main script
-from wellplates import wellplate96
-from colour_experiment.get_colours import get_colours
+from ..optobot.automate import OptimisationLoop
+from ..optobot.colorimetric import get_colours
 pass
 
 
@@ -59,8 +59,8 @@ def main():
     #whether to manually input measured values (that will obtained after the liquids are mixed with certain volumes), 
     # or whether to do this automatically (in which case a "record_colors" function will be called within the class)
 
-    model = wellplate96(objective_function, liquid_names, measured_parameter_names, population_size, name = name, 
-                        measurement_function=measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
+    model = OptimisationLoop(objective_function, liquid_names, measured_parameter_names, population_size, name = name, 
+                             measurement_function=measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
 
     #call particle_swarm, random_forest, or gaussian process
     model.optimise(search_space, optimiser = 'PSO', num_iterations = num_iterations)

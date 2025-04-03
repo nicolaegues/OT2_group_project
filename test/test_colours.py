@@ -19,7 +19,7 @@ def test_get_colours(
 
     # os.makedirs(f"{data_dir}/captured_images", exist_ok=True)
     # filename = f"{data_dir}/captured_images/image_iteration_{iteration_count}"
-    filename = "test_image.jpg"
+    filename = "test_data/test_image.jpg"
     # take_photo(filename)
 
     # while loop for confirmation

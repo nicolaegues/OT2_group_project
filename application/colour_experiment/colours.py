@@ -1,6 +1,6 @@
-from colour_experiment.image_capture.take_photo import take_photo
-from colour_experiment.image_processing.planB_interpolation import PlanB_Image_Processing
-from colour_experiment.image_processing.blurry_well_detection import well_detection
+from image_capture.photo import take_photo
+from image_processing.extrapolated_grid import ExtrapolatedGrid
+from image_processing.contours_adapted import well_detection
 import os
 
 def get_colours(iteration_count, population_size, num_measured_parameters, data_dir):
@@ -33,7 +33,7 @@ def get_colours(iteration_count, population_size, num_measured_parameters, data_
         if user == 'y':
             inp = user
         elif user == 'b':
-            planB_processor = PlanB_Image_Processing(filename)
+            planB_processor = ExtrapolatedGrid(filename)
             rgb_values = planB_processor.run()
             #accounts for overlap for multiple well plates
             start_index = start_index % (96*num_measured_parameters)
@@ -81,7 +81,7 @@ def test_get_colours(iteration_count, population_size, num_measured_parameters, 
         if user == 'y':
             inp = user
         elif user == 'b':
-            planB_processor = PlanB_Image_Processing(filename)
+            planB_processor = ExtrapolatedGrid(filename)
             rgb_values = planB_processor.run()
             #accounts for overlap for multiple well plates
             start_index = start_index % (96*num_measured_parameters)

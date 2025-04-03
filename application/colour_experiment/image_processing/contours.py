@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-class Image_processing:
+class ContourDetection:
     def __init__(self, image_path, expected_grid=(8, 12)):
         """
-        Initialises the Image_processing class with the image path and expected grid dimensions.
+        Initialises the ContourDetection class with the image path and expected grid dimensions.
 
         Args:
             image_path (str): Path to the image file.

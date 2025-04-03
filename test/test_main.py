@@ -1,6 +1,6 @@
 ##main script
-from test_wellplates import wellplate96
-from colour_experiment.get_colours import test_get_colours
+from test_automate import TestOptimisationLoop
+from test_colours import test_get_colours
 pass
 
 
@@ -64,8 +64,8 @@ def main():
     # or whether to do this automatically (in which case a "record_colors" function will be called within the class)
 
     #this one tests with the liquid volumes passing straight into obj function
-    model = wellplate96(objective_function, liquid_names, measured_parameter_names, population_size, name = name, 
-                        measurement_function=test_measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
+    model = TestOptimisationLoop(objective_function, liquid_names, measured_parameter_names, population_size, name = name, 
+                             measurement_function=test_measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
     
     #this one tests with well detection
     #model = wellplate96(objective_function, liquid_names, measured_parameter_names, population_size, name = name, measurement_function=measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)

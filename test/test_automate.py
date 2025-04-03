@@ -4,7 +4,7 @@ import os
 #from opentrons_script_generator import generate_script
 import string
 import datetime
-from optimisation import opt_functions 
+from ..optobot.optimisation import optimisers 
 
 """
 image-file storing only worked when run from powershell - fix
@@ -222,9 +222,9 @@ class TestOptimisationLoop:
 
     def optimise(self, search_space, optimiser, num_iterations = 8):
         if optimiser == 'PSO':
-            opt_functions.particle_swarm(self, search_space, num_iterations)
+            optimisers.particle_swarm(self, search_space, num_iterations)
         elif optimiser == 'GP':
-            opt_functions.guassian_process(self, search_space, num_iterations)
+            optimisers.guassian_process(self, search_space, num_iterations)
         elif optimiser == 'RF':
-            opt_functions.random_forest(self, search_space, num_iterations)
+            optimisers.random_forest(self, search_space, num_iterations)
 

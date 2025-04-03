@@ -13,7 +13,7 @@ fix different nr of population_size
 store and import previous optimisation data (to not have to repeat runs)
 
 """
-class wellplate96:
+class TestOptimisationLoop:
     """
     A class to use the 96 well plate with optimisation algorithms.
 

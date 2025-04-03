@@ -1,7 +1,5 @@
-
-import sys
-from opentrons import protocol_api
 import numpy as np
+from opentrons import protocol_api
 
 """
 - need to think about whether we want a deeper wellplate for better mixing of the colors. I have a picture of the alterantive - only issue is that it is squared. 
@@ -12,26 +10,28 @@ import numpy as np
 """
 
 
-def generate_script(filepath, iter_count, wells_per_iteration, liquid_volumes, well_locs):
-    '''
+def generate_script(
+    filepath, iter_count, wells_per_iteration, liquid_volumes, well_locs
+):
+    """
     Generates an opentrons script for one iteration
 
     params:
-        iter_count (int): 
+        iter_count (int):
             the current iteration number the program is on, used for calculating which wells to pippette into
-        volume (ndarray): 
-            array containing volume of each liquid in uL. 
+        volume (ndarray):
+            array containing volume of each liquid in uL.
             row size = iteration count
             column size = number of liquids
         well_loc (int):
             Position of the well plate in the OT2. Default: 5 (the middle of the robot).
         total_volume (float):
             Total volume to be pipetted in each well. Default: 150uL.
-    '''
+    """
 
-    #This is used so that it works with .npy files, might need to be changed if we call this function from wellplate_classes
-    array_str = np.array2string(liquid_volumes, separator = ', '.replace('\n', ''))
-    code_template = f'''
+    # This is used so that it works with .npy files, might need to be changed if we call this function from wellplate_classes
+    array_str = np.array2string(liquid_volumes, separator=", ".replace("\n", ""))
+    code_template = f"""
 from opentrons import protocol_api
 import numpy as np
 
@@ -106,8 +106,6 @@ def run(protocol: protocol_api.ProtocolContext):
     #     left_pipette.drop_tip()
                 
 
-'''
-    with open(filepath, 'w') as file:
+"""
+    with open(filepath, "w") as file:
         file.write(code_template)
-
-

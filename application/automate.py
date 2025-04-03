@@ -17,7 +17,7 @@ store and import previous optimisation data (to not have to repeat runs)
 """
 
 
-class wellplate96:
+class OptimisationLoop:
     """
     A class to use the 96 well plate with optimisation algorithms.
 

@@ -1,6 +1,6 @@
 ##main script
-from wellplates import wellplate96
-from colour_experiment.get_colours import get_colours
+from test_wellplates import wellplate96
+from colour_experiment.get_colours import test_get_colours
 pass
 
 
@@ -15,6 +15,7 @@ def main():
 
     # Change this based on what you want your ideal measurement to be
     ideal_measurement = [114.8412698, 96.1111111, 37.84126984] # our ideal RGB value, taken from well A4 of test2.jpg
+    test_ideal_measurement = [14, 20, 15]
 
     #search space for the volumes of the liquids
     search_space = [[0.0, 30.0], [0.0, 30.0], [0.0, 30.0]]
@@ -28,11 +29,11 @@ def main():
     #location(s) of the wellplate(s). First one will be filled, then the remaining iterations will done on the other wellplate(s).
     wellplate_locs = [8, 5]
 
-    num_iterations = 16
+    num_iterations = 4
     population_size = 12
 
     def objective_function(measurements): 
-        errors = ((measurements - ideal_measurement)**2).sum(axis = 1)
+        errors = ((measurements - test_ideal_measurement)**2).sum(axis = 1)
         return errors
 
     def measurement_function(liquid_volumes, iteration_count, population_size, num_measured_parameters, data_dir):
@@ -45,7 +46,10 @@ def main():
         Returns:
             A population_size x num_measured_parameters size array containing the measured paramater numbers
         '''
-        return get_colours(iteration_count, population_size, num_measured_parameters, data_dir)
+        return test_get_colours(iteration_count, population_size, num_measured_parameters, data_dir)
+    
+    def test_measurement_function(liquid_volumes, iteration_count, population_size, num_measured_parameters, data_dir):
+        return liquid_volumes[:,1:]
     
 
     if population_size * num_iterations > wellplate_size*len(wellplate_locs):
@@ -59,8 +63,12 @@ def main():
     #whether to manually input measured values (that will obtained after the liquids are mixed with certain volumes), 
     # or whether to do this automatically (in which case a "record_colors" function will be called within the class)
 
+    #this one tests with the liquid volumes passing straight into obj function
     model = wellplate96(objective_function, liquid_names, measured_parameter_names, population_size, name = name, 
-                        measurement_function=measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
+                        measurement_function=test_measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
+    
+    #this one tests with well detection
+    #model = wellplate96(objective_function, liquid_names, measured_parameter_names, population_size, name = name, measurement_function=measurement_function, wellplate_shape=wellplate_shape, wellplate_locs = wellplate_locs, total_volume = total_volume)
 
     #call particle_swarm, random_forest, or gaussian process
     model.optimise(search_space, optimiser = 'PSO', num_iterations = num_iterations)

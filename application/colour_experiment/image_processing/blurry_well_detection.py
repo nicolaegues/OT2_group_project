@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 
-def well_detection(filename):
+def well_detection(filename, thresh = 30):
     '''
     Takes an image of a well plate with coloured dyes in the well, and returns a sorted
     array of the rgb values in each well
@@ -13,12 +13,12 @@ def well_detection(filename):
         rgb_list (array): a number of detected wells x 3 array of rgb values
     '''
 
+
     #modifiable parameters
     #radius is number of pixels from detecrted circles to find average RGB
     radius = 4
 
     #threshold is how grey pixel needs to be to be turned to white, higher threshold - less grey
-    thresh = 15
 
     #Sets all pixels to white if they are grey
     #Done by finding the median and checking if pixels are within a certain threshold of that median
@@ -95,6 +95,11 @@ def well_detection(filename):
                 count += 1
         rgb /= count
         rgb_list.append(rgb)
+    
+    cv.drawContours(image, contours, -1, (0, 255, 0), 2)
+    image_display = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    plt.imshow(image_display)
+    plt.show()
 
     rgb_list = np.array(rgb_list)
 

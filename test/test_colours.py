@@ -17,9 +17,9 @@ def test_get_colours(
     start_index = (iteration_count * population_size) * num_measured_parameters
     end_index = start_index + population_size * num_measured_parameters
 
-    os.makedirs(f"{data_dir}/captured_images", exist_ok=True)
+    # os.makedirs(f"{data_dir}/captured_images", exist_ok=True)
     # filename = f"{data_dir}/captured_images/image_iteration_{iteration_count}"
-    filename = "image_iteration_2.jpg"
+    filename = "test_image.jpg"
     # take_photo(filename)
 
     # while loop for confirmation

@@ -1,6 +1,6 @@
 ##main script
 from ..optobot.automate import OptimisationLoop
-from ..optobot.colorimetric import get_colours
+from ..optobot.colorimetric.colours import get_colours
 
 pass
 

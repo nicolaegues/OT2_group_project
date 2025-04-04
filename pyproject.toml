@@ -13,7 +13,7 @@ authors = [
     { name = "Hodan" },
     { name = "Nicola" },
     { name = "Pavan" },
-    { name = "Sebasitan" }
+    { name = "Sebastian" }
 ]
 license = "MIT"
 classifiers = [

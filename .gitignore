@@ -3,3 +3,6 @@ __pycache__/
 
 # Ignore local VSCode settings.
 .vscode/
+
+# Ignore macOS metadata files.
+.DS_Store

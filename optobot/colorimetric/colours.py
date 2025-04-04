@@ -1,8 +1,8 @@
 import os
 
-from image_capture.photo import take_photo
-from image_processing.contours_adapted import well_detection
-from image_processing.extrapolated_grid import ExtrapolatedGrid
+from optobot.colorimetric.image_capture.photo import take_photo
+from optobot.colorimetric.image_processing.contours_adapted import well_detection
+from optobot.colorimetric.image_processing.extrapolated_grid import ExtrapolatedGrid
 
 
 def get_colours(iteration_count, population_size, num_measured_parameters, data_dir):

@@ -5,8 +5,8 @@ import string
 import numpy as np
 import pandas as pd
 
-from optimisation import optimisers
-from ot2_protocol import generate_script
+from optobot.optimisation import optimisers
+from optobot.ot2_protocol import generate_script
 
 """
 image-file storing only worked when run from powershell - fix

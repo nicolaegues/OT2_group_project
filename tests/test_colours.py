@@ -1,7 +1,7 @@
 import os
 
-from ..optobot.colorimetric.image_processing.contours_adapted import well_detection
-from ..optobot.colorimetric.image_processing.extrapolated_grid import ExtrapolatedGrid
+from optobot.colorimetric.image_processing.contours_adapted import well_detection
+from optobot.colorimetric.image_processing.extrapolated_grid import ExtrapolatedGrid
 
 
 def test_get_colours(

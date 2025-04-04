@@ -7,7 +7,7 @@ import string
 import numpy as np
 import pandas as pd
 
-from ..optobot.optimisation import optimisers
+from optobot.optimisation import optimisers
 
 """
 image-file storing only worked when run from powershell - fix

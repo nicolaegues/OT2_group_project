@@ -23,8 +23,8 @@ are required.
 
 ## Installation
 <p align="justify">
-<code>OptoBot</code> can be installed from <code>PyPI</code> using the 
-following command.
+<code>OptoBot</code> can be installed from <code>PyPI</code> with <code>pip</code> 
+using the following command.
 </p>
 
 ```
@@ -32,8 +32,8 @@ $ pip install optobot
 ```
 
 <p align="justify">
-<code>OptoBot</code> can also be installed from <code>source</code> using the 
-following commands.
+<code>OptoBot</code> can also be installed from source with <code>pip</code> 
+using the following commands.
 </p>
 
 ```

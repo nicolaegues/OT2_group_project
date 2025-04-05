@@ -1,6 +1,9 @@
 # Ignore Python cached files.
 __pycache__/
 
+# Ignore Sphinx built document files.
+_build/
+
 # Ignore local VSCode settings.
 .vscode/
 

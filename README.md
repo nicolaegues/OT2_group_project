@@ -8,7 +8,7 @@ Welcome! <code>OptoBot</code> is a package for implementing automated
 experimental optimisation using an <a href="https://opentrons.com/robots/ot-2">Opentrons OT-2</a> 
 liquid handling robot. 
 <!--><!-->
-<code>Optobot</code> aims to provide lab scientists with a simple interface for 
+<code>OptoBot</code> aims to provide lab scientists with a simple interface for 
 implementing experimental optimisation in their own work with minimal 
 programming experience.
 <!--><!-->

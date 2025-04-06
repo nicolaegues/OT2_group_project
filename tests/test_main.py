@@ -12,6 +12,9 @@ Alternatively, the colour extraction process can be tested by using
 well-image instead of taking a picture. 
 
 Run on the command line as: python -m tests.test_main
+(If using WSL, make sure you've done: sudo apt install python3-tk to enable 
+interactive FigureCanvas - used during the colour extraction process)
+
 """
 
 import sys
@@ -159,7 +162,7 @@ def main():
         measured_parameter_names=measured_parameter_names,
         population_size=population_size,
         name=name,
-        measurement_function=test_measurement_function,
+        measurement_function=measurement_function,
         wellplate_shape=wellplate_shape,
         wellplate_locs=wellplate_locs,
         total_volume=total_volume,

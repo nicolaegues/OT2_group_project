@@ -1,0 +1,11 @@
+/* Justified Paragraphs */
+p {
+    text-align: justify;
+}
+
+/* Centred Figure Captions */
+.caption-text {
+    display: inline-block;
+    text-align: center !important;
+    width: 100%;
+}

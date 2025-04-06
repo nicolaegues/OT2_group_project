@@ -74,7 +74,7 @@ In its current implementation OptoBot focuses on automating and optimising
 colorimetric experiments. 
 These are experiments where the experimental products can be assessed based on 
 their measured RGB colour using a camera. 
-For example, an experiment where red, green and blue liquids (e.g. food 
+For example, an experiment where red, yellow and blue liquids (e.g. food 
 colouring) along with water are mixed to produce a pre-defined target colour. 
 The experimental setup of such an experiment is shown below.
 

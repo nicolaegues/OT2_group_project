@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def well_detection(filename, thresh=30):
+
+def well_detection(captured_im_path, detected_wells_figs_path, thresh=30):
     """
     Takes an image of a well plate with coloured dyes in the well, and returns a sorted
     array of the rgb values in each well
@@ -22,8 +23,7 @@ def well_detection(filename, thresh=30):
 
     # Sets all pixels to white if they are grey
     # Done by finding the median and checking if pixels are within a certain threshold of that median
-    image = cv.imread(filename)
-
+    image = cv.imread(captured_im_path)
     for i in range(np.shape(image)[0]):
         for j in range(np.shape(image)[1]):
             pixel = image[i, j]
@@ -99,6 +99,7 @@ def well_detection(filename, thresh=30):
     cv.drawContours(image, contours, -1, (0, 255, 0), 2)
     image_display = cv.cvtColor(image, cv.COLOR_BGR2RGB)
     plt.imshow(image_display)
+    plt.savefig(detected_wells_figs_path)
     plt.show()
 
     rgb_list = np.array(rgb_list)

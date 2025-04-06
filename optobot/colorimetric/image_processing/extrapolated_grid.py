@@ -6,8 +6,9 @@ from matplotlib.backend_bases import MouseEvent
 
 
 class ExtrapolatedGrid:
-    def __init__(self, image_path):
-        self.image = plt.imread(image_path)
+    def __init__(self, captured_image_path, detected_well_figs_path):
+        self.detected_well_figs_path = detected_well_figs_path
+        self.image = plt.imread(captured_image_path)
         self.clicked_points = []
         self.rgb_values = None
         self.fig, self.ax = plt.subplots()
@@ -65,6 +66,8 @@ class ExtrapolatedGrid:
             self.ax.imshow(self.image)
             self.fig.canvas.mpl_connect("button_press_event", self.on_click)
             plt.show()
+            self.fig.savefig(self.detected_well_figs_path)
+
 
             answer = input("Happy with the grid? [y/n] ")
             if answer.lower() == "y":

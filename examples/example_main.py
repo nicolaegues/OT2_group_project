@@ -13,7 +13,9 @@ from optobot.colorimetric.colours import get_colours
 
 def main():
     # Define an experiment name.
-    name = "colour_experiment"
+    experiment_name = "colour_experiment"
+    data_storage_folder = "examples/results_data" 
+    name = f"{data_storage_folder}/{experiment_name}"
 
     # Define the experimental parameters.
     # In this experiment, these are RGB colour pigments and water.

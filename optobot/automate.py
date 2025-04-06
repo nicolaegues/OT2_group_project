@@ -55,6 +55,8 @@ class OptimisationLoop:
         wellplate_shape=[8, 12],
         wellplate_locs=[5],
         total_volume=90.0,
+        network_connection = False,
+        ot2_labware = None
     ):
 
         self.objective_function = objective_function
@@ -65,6 +67,8 @@ class OptimisationLoop:
         os.makedirs(exp_id, exist_ok=True)
         self.exp_data_dir = exp_id
 
+        self.network_connection = network_connection
+        self.ot2_labware = ot2_labware
         self.wellplate_shape = wellplate_shape
         self.iteration_count = 0  # Initialize iteration counter
         self.num_liquids = len(liquid_names)
@@ -84,41 +88,20 @@ class OptimisationLoop:
         )
 
     def __call__(self, liquid_volumes):
-        """
-        Executes one optimization iteration.
-        1. Takes the input volumes of each liquid and calculates how much water to use to dilute each set.
-        2. generates the opentrons-run script for this iteration,
-        3. Waits for the user to upload this script to the robot,
-        4. Gathers the measurements (e.g. final colors if dyes are mixed) after the liquids have been combined in each well - either manually or by calling a measurement function,
-        5. Computes the errors by calling the objective function that compares these measurements to an ideal, pre-defined measurement.
-
-        Parameters:
-        - liquid_volumes (ndarray):
-            Array containing the volumes of each liquid that will be put in each of the wells of the current iteration.
-            Its shape is (population_size, num_liquids).
-
-        Returns:
-        - errors (array):
-            Computed errors from the objective function.
-
-        """
-
+        
         # Adds water so that it fills up to the same volume each time
         water_vol = self.total_volume - np.sum(liquid_volumes, axis=1)
         # water will now be the first liquid to be added
         liquid_volumes = np.hstack([water_vol.reshape(-1, 1), liquid_volumes])
 
-        # path where the generated script will be stored
-        filepath = f"{self.exp_data_dir}/generated_ot2_script.py"
-        generate_script(
-            filepath,
-            self.iteration_count,
-            self.population_size,
-            liquid_volumes,
-            self.wellplate_locs,
-        )
-
-        input("Upload script, wait for robot, and then press any key to continue: ")
+        if not self.network_connection: 
+            # path where the generated script will be stored
+            filepath = f"{self.exp_data_dir}/generated_ot2_script.py"
+            generate_script(filepath, self.iteration_count, self.population_size, liquid_volumes, self.wellplate_locs)
+            input("Upload script, wait for robot, and then press any key to continue: ")
+            
+        else: 
+            self.liquid_handling(liquid_volumes)
 
         # obtain measurements either manually or automatically (in the case that color-recording wants to be done)
         if self.measurement_function == "manual":
@@ -133,7 +116,6 @@ class OptimisationLoop:
                 self.exp_data_dir,
             )
 
-       
         errors = self.objective_function(measurements)
 
         # Data storage
@@ -308,3 +290,45 @@ class OptimisationLoop:
             optimisers.guassian_process(self, search_space, num_iterations)
         elif optimiser == "RF":
             optimisers.random_forest(self, search_space, num_iterations)
+
+    def liquid_handling(self, volumes):
+
+        plates = self.ot2_labware['plates']
+        reservoir = self.ot2_labware['reservoir']
+        left_pipette = self.ot2_labware['left_pipette']
+
+        #concentrations used must come in a num of wells x num of liquids size array
+        num_liquids = volumes.shape[1]
+
+        
+        start_index = (self.iteration_count * self.population_size) 
+        current_plate_idx = start_index // 96
+        plate = plates[f"plate_{current_plate_idx+1}"]  # Get the correct plate
+        print(f"plate_{current_plate_idx+1}")
+
+        well_count = self.iteration_count - current_plate_idx*8
+
+        for liquid in range(num_liquids): 
+
+            left_pipette.pick_up_tip() #one tip for each dye-distribution into all the wells. then a new tip for another color distribution into all the wells. 
+
+            target_wells = []
+            for well, volume_set in enumerate(volumes):
+
+                #multiplying by factor of 8: this way we first fill A1 - A12, then B1-B12. instead of A1-H1, then A2-H2.... 
+                well_index = well * 8 + well_count
+
+                target_well = plate.wells()[well_index] 
+                target_wells.append(target_well)
+
+                
+                liquid_volume = volume_set[liquid]
+                liquid_source = reservoir[f'A{liquid+1}']
+
+                if liquid != num_liquids - 1:
+                    left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never")
+                else: 
+                    left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never", mix_after=(3, 20 ))
+
+            #bin the tip
+            left_pipette.drop_tip()

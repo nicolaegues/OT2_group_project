@@ -60,8 +60,8 @@ class OptimisationLoop:
         self.objective_function = objective_function
 
         # Create experiment directory. All the data will be saved here.
-        current_datetime = datetime.datetime.now().strftime("%d∕%m∕%y_%H꞉%M꞉%S")
-        exp_id = f"{current_datetime}_{name}"
+        current_datetime =  datetime.datetime.now().strftime("%a-%d-%b-%Y-at-%I-%M-%S%p")
+        exp_id = f"{name}_{current_datetime}"
         os.makedirs(exp_id, exist_ok=True)
         self.exp_data_dir = exp_id
 
@@ -133,6 +133,7 @@ class OptimisationLoop:
                 self.exp_data_dir,
             )
 
+       
         errors = self.objective_function(measurements)
 
         # Data storage
@@ -248,7 +249,7 @@ class OptimisationLoop:
         self.error_df.to_csv(f"{self.exp_data_dir}/errors.csv")
 
         # only store the measurement data if it hasn't already been manually inputted into a csv.
-        if self.measurement_function == False:
+        if self.measurement_function != "manual":
             self.measurements_df.values.reshape(self.measurements_df.size)[
                 start_index
                 * self.num_measured_parameters : end_index

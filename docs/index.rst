@@ -4,8 +4,8 @@
 
 |
 
-Welcome To OptoBot Documentation!
-=================================
+Welcome to OptoBot's Documentation!
+===================================
 **OptoBot** is a package for implementing automated experimental optimisation 
 using the `Opentrons OT-2 <https://opentrons.com/robots/ot-2>`_ liquid handling 
 robot. Its aim is to enable lab scientists to implement automated experimental 

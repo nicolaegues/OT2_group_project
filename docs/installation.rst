@@ -3,7 +3,7 @@ Installation
 
 Stable Release
 --------------
-The ``OptoBot`` package can be installed from ``PyPI`` with ``pip`` using the 
+The **OptoBot** package can be installed from ``PyPI`` with ``pip`` using the 
 following command.
 
 .. code-block:: bash
@@ -12,7 +12,7 @@ following command.
 
 Source Install
 --------------
-The ``OptoBot`` package can also be installed from source with ``pip`` using 
+The **OptoBot** package can also be installed from source with ``pip`` using 
 the following commands.
 
 .. code-block:: bash

@@ -2,10 +2,9 @@
 from optobot.automate import OptimisationLoop
 from tests.test_colours import test_get_colours
 
-
-# to-do: allow user to tweak optim params for algorithms
-# complete if loop for other optim methods
-
+"""
+Run on the command line as: python -m tests.test_main
+"""
 
 def main():
 

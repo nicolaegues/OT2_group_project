@@ -1,18 +1,17 @@
 ##main script
-from test_automate import TestOptimisationLoop
-from test_colours import test_get_colours
+from optobot.automate import OptimisationLoop
+from tests.test_colours import test_get_colours
 
-pass
-
-
-# to-do: allow user to tweak optim params for algorithms
-# complete if loop for other optim methods
-
+"""
+Run on the command line as: python -m tests.test_main
+"""
 
 def main():
 
     # experiment name
-    name = "colour_experiment"
+    experiment_name = "colour_experiment"
+    data_storage_folder = "tests/test_results_data" 
+    name = f"{data_storage_folder}/{experiment_name}"
 
     # Change this based on what you want your ideal measurement to be
     ideal_measurement = [
@@ -34,7 +33,7 @@ def main():
     # location(s) of the wellplate(s). First one will be filled, then the remaining iterations will done on the other wellplate(s).
     wellplate_locs = [8, 5]
 
-    num_iterations = 4
+    num_iterations = 8
     population_size = 12
 
     def objective_function(measurements):
@@ -81,7 +80,7 @@ def main():
     # or whether to do this automatically (in which case a "record_colors" function will be called within the class)
 
     # this one tests with the liquid volumes passing straight into obj function
-    model = TestOptimisationLoop(
+    model = OptimisationLoop(
         objective_function,
         liquid_names,
         measured_parameter_names,

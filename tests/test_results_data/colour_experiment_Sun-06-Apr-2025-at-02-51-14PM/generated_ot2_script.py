@@ -6,23 +6,23 @@ requirements = {"robotType": "OT-2", "apiLevel": "2.16"}
 
 def run(protocol: protocol_api.ProtocolContext):
 
-    iteration_count = 15
+    iteration_count = 7
     wells_per_iteration = 12
-    volumes = np.array([[45.14562631, 19.4343801 , 16.33371344,  9.08628015],
- [46.85562636, 19.07446532, 15.81107952,  8.2588288 ],
- [44.40531543, 20.16005787, 17.85321768,  7.58140903],
- [47.17884112, 18.60026518, 15.85309196,  8.36780174],
- [46.91512231, 18.17611884, 15.92923689,  8.97952196],
- [47.21762066, 19.70038006, 15.23235785,  7.84964143],
- [46.93755945, 17.96363481, 15.99818913,  9.1006166 ],
- [47.69613052, 18.09784267, 15.46623206,  8.73979474],
- [46.07628248, 15.39715424, 16.26490801, 12.26165528],
- [48.09137308, 19.94205215, 14.34315027,  7.62342449],
- [47.21119321, 20.57132923, 15.5705304 ,  6.64694716],
- [50.37216066, 19.29792684, 12.94874872,  7.38116378]])
+    volumes = np.array([[42.06915343, 13.78170516, 19.8832555 , 14.26588591],
+ [42.38639251, 12.71361819, 19.40800151, 15.4919878 ],
+ [43.02024142, 13.79028736, 18.16751135, 15.02195987],
+ [43.1372641 , 14.09678473, 17.9605694 , 14.80538178],
+ [39.87355839, 14.85761571, 21.02817419, 14.24065171],
+ [39.11736333, 14.91140276, 20.03915163, 15.93208228],
+ [41.82741893, 13.15822384, 16.97759113, 18.0367661 ],
+ [41.91896306, 12.86883258, 20.48199618, 14.73020818],
+ [36.30103228, 13.51878303, 20.67507416, 19.50511053],
+ [39.60528924, 13.6106463 , 20.65727101, 16.12679345],
+ [39.70719977, 13.55525648, 20.91061567, 15.82692807],
+ [38.27164116, 14.86675287, 21.06043097, 15.801175  ]])
 
     #location selected by user when wellplate class created
-    well_locs = [5, 8]
+    well_locs = [8, 5]
 
     #concentrations used must come in a num of wells x num of liquids size array
     iter_size = volumes.shape[0]
@@ -70,15 +70,17 @@ def run(protocol: protocol_api.ProtocolContext):
             liquid_volume = volume_set[liquid]
             liquid_source = reservoir[f'A{liquid+1}']
 
-            #if liquid != num_liquids - 1:
-            left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never" )
+            if liquid != num_liquids - 1:
+                left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never")
+            else: 
+                left_pipette.transfer(liquid_volume, liquid_source, target_well, new_tip = "never", mix_after=(3, 20 ))
 
         #bin the tip
         left_pipette.drop_tip()
 
-    for well in target_wells:
-        left_pipette.pick_up_tip()
-        left_pipette.mix(3, 20, well)
-        left_pipette.drop_tip()
+    # for well in target_wells:
+    #     left_pipette.pick_up_tip()
+    #     left_pipette.mix(3, 20, well)
+    #     left_pipette.drop_tip()
                 
 

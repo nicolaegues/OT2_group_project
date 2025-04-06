@@ -18,8 +18,12 @@ def test_get_colours(
     end_index = start_index + population_size * num_measured_parameters
 
     # os.makedirs(f"{data_dir}/captured_images", exist_ok=True)
-    # filename = f"{data_dir}/captured_images/image_iteration_{iteration_count}"
-    filename = "test_data/test_image.jpg"
+    # captured_im_path = f"{data_dir}/captured_images/image_iteration_{iteration_count}"
+    captured_im_path = "tests/test_data/test_image.jpg"
+
+    os.makedirs(f"{data_dir}/detected_well_figs", exist_ok=True)
+    detected_wells_figs_path = f"{data_dir}/detected_well_figs/fig_iteration_{iteration_count}"
+
     # take_photo(filename)
 
     # while loop for confirmation
@@ -29,9 +33,9 @@ def test_get_colours(
         # Repeats until desired result
         print("Type threshold (Default is 30):")
         threshold = int(input())
-        rgb_values = well_detection(filename, threshold)
+        rgb_values = well_detection(captured_im_path, detected_wells_figs_path, threshold)
 
-        print("Happy with detection?")
+        print("\nHappy with detection?")
         print(
             'type "y" if you are, "n" to try again, and "b" to use the manual clicking detection'
         )
@@ -39,7 +43,7 @@ def test_get_colours(
         if user == "y":
             inp = user
         elif user == "b":
-            planB_processor = ExtrapolatedGrid(filename)
+            planB_processor = ExtrapolatedGrid(captured_im_path, detected_wells_figs_path)
             rgb_values = planB_processor.run()
             # accounts for overlap for multiple well plates
             start_index = start_index % (96 * num_measured_parameters)

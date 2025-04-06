@@ -1,60 +1,81 @@
-Usage Guide
-===========
+Usage
+=====
 
-Introduction
-------------
-This package provides a flexible, open-source system for the **Opentrons OT-2 liquid-handling lab robot**, designed to optimize dye ratios using various **optimization algorithms** for precision **colour matching**. 
+Overview
+--------
+In its current implementation OptoBot focuses on automating and optimising 
+colorimetric experiments. 
+These are experiments where the experimental products can be assessed based on 
+their measured RGB colour using a camera. 
+For example, an experiment where red, green and blue liquids (e.g. food 
+colouring) along with water are mixed to produce a pre-defined target colour. 
+The experimental setup of such an experiment is shown below.
 
-Using **Python** and an external **wired webcam** or **iPhone**, the system captures images of **well plates** and extracts **RGB values** for analysis. Users can select from two different optimization algorithms to iteratively adjust dye ratios and achieve their **target colour**:
+.. figure:: _static/example-setup.png
+    :alt: Example Experimental Setup
+    :align: center
+    :width: 350
 
-- **Bayesian Optimization** (Guassian Process or Random Forest)
-- **Particle Swarm Optimization**
+    Figure: An example experimental setup for a colorimetric experiment.
 
-The system enables users to iteratively refine dye mixtures for accurate colour reproduction in **lab automation workflows**.
+OptoBot can also be used to semi-automate and optimise other experiments 
+but manual measurements of experimental products and manual inputs are 
+required. 
+We aim to develop features for automating a wider range of experiments in the 
+future.
 
+Optimisation Algorithms
+^^^^^^^^^^^^^^^^^^^^^^^
+When implementing an experimental optimisation loop, OptoBot gives users the 
+choice out of the following optimisation algorithms.
 
-Installation
-------------
++ **Particle Swarm Optimisation**
++ **Bayesian Optimisation**
+    + Acquisition Function: Gaussian Process 
+    + Acquisition Function: Random Forest
 
-You can install this package using **pip** (if supported in the future) or install it directly from the source repository.
+*Note: We plan to add more optimisation algorithms in the future.*
 
-**Option 1: Install via pip**
+Image Capture & Processing
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+In the context of colorimetric experiments, the RGB colour of experimental 
+products need to be measured between each optimisation iteration so that 
+experimental parameter volumes can be updated.
+To automate this process, OptoBot includes features for capturing an image of 
+the OT-2's deck using a user placed camera (e.g. phone camera or webcam) and 
+retrieving the RGB values of wells in the image.
 
-.. code-block:: bash
+When an image of the OT-2's deck is captured, OptoBot first attempts to locate 
+the wells in the image using a contour detection algorithm and prompts the user 
+to confirm that the wells have been located.
+If the wells have not been located, the user is then prompted to click on two 
+wells in the image and OptoBot will calculate an extrapolated grid to locate 
+the wells.
+The user can repeat this process until the wells in the image are located to a 
+desired precision.
 
-    $ pip install OptoBot
+*Note: We plan to continue improving the image processing algorithms in the future.*
 
+OT-2 Protocol Generation
+^^^^^^^^^^^^^^^^^^^^^^^^
+To control the `Opentrons OT-2 <https://opentrons.com/robots/ot-2>`_ a custom 
+protocol must be written and uploaded.
+OptoBot automates the process of generating the protocol after each iteration 
+of optimisation.
+However, the user has to upload the generated protocol to the 
+`Opentrons App <https://opentrons.com/ot-app>`_ themselves, making this a 
+manual step in the experimental optimisation loop.
 
-**Option 2: Install from source**
+*Note: We plan to automate protocol upload to the OT-2 using SSH in the future.*
 
-Clone the repository from GitHub and install manually:
+Workflow
+--------
+The workflow of an automated experimental optimisation loop for a colorimetric 
+experiment using OptoBot is shown below. In the current implementation of 
+OptoBot, there are two manual steps requiring inputs/actions from the user.
 
-.. code-block:: bash
+.. figure:: _static/example-workflow.png
+    :alt: Example OptoBot Workflow
+    :align: center
 
-    $ git clone https://github.com/nicolaegues/OptoBot.git
-    $ cd OT2_group_project
-    $ pip install .
-
-
-Basic Usage
------------
-
-*(To be completed once code implementation is finalized.)*
-
-
-Common Pitfalls & Troubleshooting
----------------------------------
-
-This package contains two options for image processing:
-
-1. **Grid-based detection** - Users click on two wells within the well plate image and the programme generates a grid based on these points.
-2. **Contour detection** - The programme automatically detects the wells within the well plate image.
-
-Users may not be able to successfully use Contour Detection depending on the quality of their camera and the environments lighting. Grid-based detection acts as a reliable fallback option. 
-
-
----
-
-This document will be updated as more functionalities are developed and tested.
-
-
+    Figure: An example workflow with OptoBot for a colorimetric experiment.

@@ -139,7 +139,11 @@ def main():
         )
     
     def test_measurement_function(
-        liquid_volumes
+        liquid_volumes,
+        iteration_count,
+        population_size,
+        num_measured_parameters,
+        data_dir,
     ):
         """
         Function that skips the measurement step for testing purposes to check the optimisation works, 

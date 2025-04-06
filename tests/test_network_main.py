@@ -1,5 +1,13 @@
 """
-Simulate from command line via: 
+The proposed main script for the version where the robot is connected to the robot. 
+It is also simultanously the opentrons run script. The user must upload this to the OT2 app at the 
+beginning of the experiment, after which all optimsation steps will be executed in one go by the 
+robot. 
+This also means, however, that there can't be any well detection pop-ups prompting the user to 
+decide whether they are happy with the well detection. Only a fully automatic method can be used 
+(and must therefore work flawlessly!).
+
+Simulate the OT2 robot outputs from command line via: 
 
 export PYTHONPATH=$(pwd)
 opentrons_simulate tests/test_network_main.py
@@ -11,10 +19,11 @@ import numpy as np
 
 import sys
 from optobot.automate import OptimisationLoop
-from tests.test_colours import test_get_colours
+from tests.test_colours_network import test_get_colours
 
 requirements = {"robotType": "OT-2", "apiLevel": "2.16"}
 
+# Set whether the robot is connected to the network (True) or not (False)
 network_connection = True
 
 # Define an experiment name.

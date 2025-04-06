@@ -27,7 +27,7 @@ def main():
     name = f"{data_storage_folder}/{experiment_name}"
 
     # Define the experimental parameters.
-    # In this experiment, these are RGB colour pigments and water.
+    # In this experiment, these are BYR colour pigments and water.
     liquid_names = ["water", "blue", "yellow", "red"]
 
     # Define the measured parameters.

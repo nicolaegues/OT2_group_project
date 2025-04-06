@@ -292,6 +292,14 @@ class OptimisationLoop:
             optimisers.random_forest(self, search_space, num_iterations)
 
     def liquid_handling(self, volumes):
+        """
+        This function is called in the case where the robot is connected to the network, 
+        and there is only one run script (the "main" script) which is uploaded only once 
+        at the beginning. Within the ot2's run script, this class is called - instructing 
+        the robot to mix the liquids at the given iteration's volumes via with following 
+        commands below. 
+        
+        """
 
         plates = self.ot2_labware['plates']
         reservoir = self.ot2_labware['reservoir']

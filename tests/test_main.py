@@ -15,11 +15,14 @@ Run on the command line as: python -m tests.test_main
 """
 
 import sys
-from optobot.automate import OptimisationLoop
 from tests.test_colours import test_get_colours
+from optobot.automate import OptimisationLoop
+
 
 
 def main():
+    
+    network_connection = False
 
 # Define an experiment name.
     experiment_name = "colour_experiment"
@@ -154,15 +157,17 @@ def main():
 
     # Define the automated optimisation loop.
     model = OptimisationLoop(
-        objective_function=objective_function,
-        liquid_names=liquid_names,
-        measured_parameter_names=measured_parameter_names,
-        population_size=population_size,
+        objective_function,
+        liquid_names,
+        measured_parameter_names,
+        population_size,
         name=name,
         measurement_function=test_measurement_function,
         wellplate_shape=wellplate_shape,
         wellplate_locs=wellplate_locs,
         total_volume=total_volume,
+        network_connection = network_connection,
+        ot2_labware = None
     )
 
     # Start the optimisation loop.

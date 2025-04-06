@@ -1,7 +1,7 @@
 """
 An example script showing how to use the optobot package. This script uses the
-optobot package in the context of a colour mixing experiment, where RGB liquid
-pigments are mixed to create a target colour.
+optobot package in the context of a colour mixing experiment, where blue, yellow 
+and red (BYR) liquid pigments are mixed to create a target colour.
 """
 
 # Import required libraries.
@@ -18,7 +18,7 @@ def main():
     name = f"{data_storage_folder}/{experiment_name}"
 
     # Define the experimental parameters.
-    # In this experiment, these are RGB colour pigments and water.
+    # In this experiment, these are BYR colour pigments and water.
     liquid_names = ["water", "blue", "yellow", "red"]
 
     # Define the measured parameters.
@@ -34,7 +34,7 @@ def main():
     ]  # Taken from a previous experiment.
 
     # Define the search space of the experimental parameters.
-    # In this experiment, this is the range of volumes for RGB colour pigments.
+    # In this experiment, this is the range of volumes for BYR colour pigments.
     search_space = [[0.0, 30.0], [0.0, 30.0], [0.0, 30.0]]
 
     # Define the well plate dimensions.

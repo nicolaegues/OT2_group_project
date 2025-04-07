@@ -4,16 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optobot"
-version = "0.1.1.post1"
+version = "0.1.1.post2"
 description = "A package for automated experimental optimisation using an Opentrons OT-2 robot."
 readme = "README.md"
 authors = [
-    { name = "Akthar Uzzaman", email = "uzzamanakthar@gmail.com" },
-    { name = "Hanxuan Sheng", email = "hanxuan.sheng06@gmail.com" },
-    { name = "Hodan Abdi", email = "hodanyonis01@gmail.com" },
-    { name = "Nicola Egues Muhlberger", email = "nicola.egues@gmail.com" },
-    { name = "Pavan Ponupureddi", email = "pavan.ponupureddi@outlook.com" },
-    { name = "Sebastian Parkin", email = "sebparkinwork@gmail.com" }
+    { name = "Akthar Uzzaman" },
+    { name = "Hanxuan Sheng" },
+    { name = "Hodan Abdi" },
+    { name = "Nicola Egues Muhlberger" },
+    { name = "Pavan Ponupureddi" },
+    { name = "Sebastian Parkin" }
 ]
 license = "MIT"
 classifiers = [

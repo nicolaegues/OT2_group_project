@@ -19,6 +19,7 @@ def main():
 
     # Define the experimental parameters.
     # In this experiment, these are BYR colour pigments and water.
+    # NOTE: The dilution agent should be entered as the first parameter.
     liquid_names = ["water", "blue", "yellow", "red"]
 
     # Define the measured parameters.
@@ -105,7 +106,8 @@ def main():
         Parameters
         ----------
         liquid_volumes : np.ndarray
-            The liquid volumes of the experimental products.
+            The liquid volumes of the experimental parameters used to generate 
+            the experimental products in the current iteration.
 
         iteration_count : int
             The current iteration.

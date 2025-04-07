@@ -41,3 +41,4 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/nicolaegues/OptoBot"
+Documentation = "https://optobot.readthedocs.io/en/latest/"

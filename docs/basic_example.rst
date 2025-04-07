@@ -9,9 +9,9 @@ In this example, the experiment is mixing red, yellow and blue (RYB) food
 colouring along with water to produce a pre-defined target colour. 
 One thing to note is that the water acts as a dilution agent and will not be 
 included as a parameter in the search space for the optimisation algorithm.
-Instead the volume of water is calculated as the remaining volume in a well 
-after the red, green and blue food colouring have been added. The experimental 
-setup could be as shown below.
+Instead, the volume of water is calculated as the remaining volume in a well 
+after the red, yellow and blue food colouring volumes have been calculated. 
+The experimental setup is shown below.
 
 .. figure:: _static/example-setup.png
     :alt: Example Experimental Setup
@@ -38,6 +38,9 @@ This starts with setting the experimental parameters and experimental response
 variables.
 For optimisation, the target experimental response and the experimental 
 parameter search space is also defined.
+Note that the dilution agent should be entered as the first experimental 
+parameter because the first element will not considered as part of the search 
+space for optimisation. 
 
 .. code-block:: python
 
@@ -46,6 +49,7 @@ parameter search space is also defined.
 
     # Define the experimental parameters.
     # In this experiment, these are RYB colour pigments and water.
+    # NOTE: The dilution agent should be entered as the first parameter.
     liquid_names = ["water", "red", "yellow", "blue"]
 
     # Define the measured parameters.
@@ -176,7 +180,8 @@ response variables.
         Parameters
         ----------
         liquid_volumes : np.ndarray
-            The liquid volumes of the experimental products.
+            The liquid volumes of the experimental parameters used to generate 
+            the experimental products in the current iteration.
 
         iteration_count : int
             The current iteration.
@@ -253,8 +258,11 @@ image of the OT-2's deck and the user will be prompted to either accept the
 results or redo the contour detection algorithm.
 The user can also decide to use a manual extrapolated grid algorithm instead of 
 the contour detection algorithm to locate the wells in the image.
+To use the manual extrapolated grid algorithm, the user will be prompted to 
+click on two consecutive wells in the image from which an extrapolated grid 
+of well locations is calculated.
 This process can be repeated until the wells in the image are located to the 
-users desired precision.
+user's desired precision.
 
 .. code-block:: text
 
@@ -276,8 +284,8 @@ Once an image with located wells has been accepted, the RGB values of the
 experimental products from the current iteration of optimisation will be fed to 
 the optimisation algorithm.
 If the target experimental response has not been achieved, the optimisation 
-algorithm will generate a new OT-2 script with the next experimental parameter 
-values and the following text will be outputted to the command line.
+algorithm will generate a new OT-2 protocol script with the next experimental 
+parameter values and the following text will be outputted to the command line.
 The process described in the above paragraphs is then repeated until either the 
 target experimental response is achieved or the defined number of optimisation 
 iterations are completed.
@@ -314,6 +322,7 @@ The full script for the example is given below.
 
         # Define the experimental parameters.
         # In this experiment, these are RYB colour pigments and water.
+        # NOTE: The dilution agent should be entered as the first parameter.
         liquid_names = ["water", "red", "yellow", "blue"]
 
         # Define the measured parameters.
@@ -400,7 +409,8 @@ The full script for the example is given below.
             Parameters
             ----------
             liquid_volumes : np.ndarray
-                The liquid volumes of the experimental products.
+                The liquid volumes of the experimental parameters used to generate 
+                the experimental products in the current iteration.
 
             iteration_count : int
                 The current iteration.

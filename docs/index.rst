@@ -26,3 +26,4 @@ Checkout the package below!
     introduction
     installation
     usage
+    basic_example

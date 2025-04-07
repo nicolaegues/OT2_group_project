@@ -11,7 +11,7 @@ class ExtrapolatedGrid:
         self.image = plt.imread(captured_image_path)
         self.clicked_points = []
         self.rgb_values = None
-        self.fig, self.ax = plt.subplots()
+        self.fig, self.ax = None, None
 
     def get_rgb_at_center(self, x, y):
         """Returns the RGB values at a given (x, y) coordinate"""
@@ -61,17 +61,25 @@ class ExtrapolatedGrid:
     def run(self):
         """Displays the image and allows user interaction to define the grid"""
         while True:
+            # reset
             self.clicked_points = []
             self.fig, self.ax = plt.subplots()
             self.ax.imshow(self.image)
             self.fig.canvas.mpl_connect("button_press_event", self.on_click)
-            plt.show()
-            self.fig.savefig(self.detected_well_figs_path)
 
+            # show interactive window
+            plt.show(block=True)
 
+            # aave only if user clicked and generated well centers
+            if self.rgb_values is not None:
+                self.fig.savefig(self.detected_well_figs_path)
+                print(f"Figure saved to {self.detected_well_figs_path}")
+
+            # ask for confirmation
             answer = input("Happy with the grid? [y/n] ")
             if answer.lower() == "y":
-                return self.rgb_values  # return RGB values when done
+                return self.rgb_values  # return when done
+
 
 
 # Example usage inside the script

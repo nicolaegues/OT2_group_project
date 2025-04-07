@@ -21,6 +21,8 @@ experiments but manual measurements of experimental products and manual inputs
 are required.
 </p>
 
++ **Documentation**: https://optobot.readthedocs.io/en/latest/
+
 ## Installation
 <p align="justify">
 <code>OptoBot</code> can be installed from <code>PyPI</code> with <code>pip</code> 

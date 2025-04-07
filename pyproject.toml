@@ -25,8 +25,9 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
     "Intended Audience :: Developers",
-    "Topic :: Scientific/Computational Chemistry",
     "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    
 ]
 requires-python = ">=3.10,<3.13"
 dependencies = [

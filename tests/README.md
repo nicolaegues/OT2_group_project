@@ -8,6 +8,10 @@ robot.
 The following things can be tested beforehand.
 </p>
 
+> [!IMPORTANT]
+> If running the scripts from a Linux OS, ensure that the Tkinter bindings are up to date.
+> This can be done using the command ```$ sudo apt install python3-tk``` for Debian based distros.
+
 ## 1. Testing of the Optimisation Process
 <p align="justify">
 Since no actual liquid-mixing and subsequent measuring/colour recording 
@@ -50,7 +54,8 @@ $ python -m tests.test_main
 ## 3. Simulation of an Example Generated OT2 Run Script
 <p align="justify">
 The file <code>simulate_ot2_script.py</code> is an example of a generated 
-opentrons run script. 
+opentrons run script.
+<!--><!-->
 The outputs of the robot can be simulated by running the following command 
 from the root directory.
 </p>

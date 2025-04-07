@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/_static/logo.png" alt="OptoBot Logo">
+  <img src="https://raw.githubusercontent.com/nicolaegues/OptoBot/main/docs/_static/logo.png" alt="OptoBot Logo">
 </p>
 
 ## Overview

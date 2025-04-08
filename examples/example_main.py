@@ -26,6 +26,7 @@ def main():
 
     # Set a target measurement.
     # In this experiment, this a set of defined RGB values.
+    # NOTE: The target can be set to None for minimisation/maximisation based optimisation.
     target_measurement = [
         114.8412698,
         96.1111111,

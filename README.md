@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/_static/logo.png" alt="OptoBot Logo">
+  <img src="https://raw.githubusercontent.com/nicolaegues/OptoBot/main/docs/_static/logo.png" alt="OptoBot Logo">
 </p>
 
 ## Overview
@@ -20,6 +20,8 @@ assessed based on their measured RGB colour using a camera.
 experiments but manual measurements of experimental products and manual inputs 
 are required.
 </p>
+
++ **Documentation**: https://optobot.readthedocs.io/en/latest/
 
 ## Installation
 <p align="justify">

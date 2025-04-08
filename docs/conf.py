@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'OptoBot'
-copyright = '2025, Akthar, Hanxuan, Hodan, Nicola, Pavan, Sebastian'
-author = 'Akthar, Hanxuan, Hodan, Nicola, Pavan, Sebastian'
+copyright = '2025, Akthar Uzzaman, Hanxuan Sheng, Hodan Abdi, Nicola Egues Muhlberger, Pavan Ponupureddi, Sebastian Parkin'
+author = 'Akthar Uzzaman, Hanxuan Sheng, Hodan Abdi, Nicola Egues Muhlberger, Pavan Ponupureddi, Sebastian Parkin'
 release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
@@ -26,6 +26,4 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-html_css_files = [
-    'custom.css',
-]
+html_css_files = ['custom.css']

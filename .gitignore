@@ -1,10 +1,17 @@
+# Ignore Python build files.
+build/
+dist/
+
+# Ignore Python egg-info files.
+*.egg-info/
+
+# Ignore Sphinx built documentation files.
+_build/
+
 # Ignore Python cached files.
 __pycache__/
 
-# Ignore Sphinx built document files.
-_build/
-
-# Ignore local VSCode settings.
+# Ignore local VS Code settings.
 .vscode/
 
 # Ignore macOS metadata files.

@@ -4,16 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optobot"
-version = "0.1.0"
+version = "0.1.1.post2"
 description = "A package for automated experimental optimisation using an Opentrons OT-2 robot."
 readme = "README.md"
 authors = [
-    { name = "Akthar" },
-    { name = "Hanxuan" },
-    { name = "Hodan" },
-    { name = "Nicola" },
-    { name = "Pavan" },
-    { name = "Sebastian" }
+    { name = "Akthar Uzzaman" },
+    { name = "Hanxuan Sheng" },
+    { name = "Hodan Abdi" },
+    { name = "Nicola Egues Muhlberger" },
+    { name = "Pavan Ponupureddi" },
+    { name = "Sebastian Parkin" }
 ]
 license = "MIT"
 classifiers = [
@@ -25,10 +25,11 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
     "Intended Audience :: Developers",
-    "Topic :: Scientific/Computational Chemistry",
     "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "matplotlib==3.9.2",
     "numpy==1.26.4",
@@ -41,3 +42,4 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/nicolaegues/OptoBot"
+Documentation = "https://optobot.readthedocs.io/en/latest/"

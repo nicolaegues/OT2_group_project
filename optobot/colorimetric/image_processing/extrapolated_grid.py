@@ -81,7 +81,6 @@ class ExtrapolatedGrid:
                 return self.rgb_values  # return when done
 
 
-
 # Example usage inside the script
 if __name__ == "__main__":
     image_path = "C:/Users/nicol/OneDrive - University of Bristol/OT2_group_project/application/image_capture/Screenshot 2025-03-20 104037.png"

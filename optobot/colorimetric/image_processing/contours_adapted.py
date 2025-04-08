@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-
 def well_detection(captured_im_path, detected_wells_figs_path, thresh=30):
     """
     Takes an image of a well plate with coloured dyes in the well, and returns a sorted

@@ -143,8 +143,7 @@ class OptimisationLoop:
         # Data storage
         self.store_data(liquid_volumes, measurements, errors)
 
-
-        if self.target_measurement != None: 
+        if self.target_measurement != None:
             # Terminate the optimisation loop if the measurements are close enough to the target measurement,
             # based on the specified relative tolerance
             self.check_convergence(measurements)

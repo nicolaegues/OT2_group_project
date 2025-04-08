@@ -33,6 +33,9 @@ def main():
         37.84126984,
     ]  # Taken from a previous experiment.
 
+    # Set a relative tolerance. If any measurements are within this range of the target, the optimisation loop is stopped. 
+    relative_tolerance = 0.05
+
     # Define the search space of the experimental parameters.
     # In this experiment, this is the range of volumes for BYR colour pigments.
     search_space = [[0.0, 30.0], [0.0, 30.0], [0.0, 30.0]]
@@ -134,13 +137,16 @@ def main():
         objective_function=objective_function,
         liquid_names=liquid_names,
         measured_parameter_names=measured_parameter_names,
+        target_measurement = target_measurement,
         population_size=population_size,
         name=name,
         measurement_function=measurement_function,
         wellplate_shape=wellplate_shape,
         wellplate_locs=wellplate_locs,
         total_volume=total_volume,
+        relative_tolerance= relative_tolerance,
     )
+
 
     # Start the optimisation loop.
     # In this experiment, Particle Swarm Optimisation is used.

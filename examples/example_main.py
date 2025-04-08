@@ -14,8 +14,6 @@ from optobot.colorimetric.colours import get_colours
 def main():
     # Define an experiment name.
     experiment_name = "colour_experiment"
-    data_storage_folder = "examples/results_data" 
-    name = f"{data_storage_folder}/{experiment_name}"
 
     # Define the experimental parameters.
     # In this experiment, these are BYR colour pigments and water.
@@ -34,7 +32,8 @@ def main():
         37.84126984,
     ]  # Taken from a previous experiment.
 
-    # Set a relative tolerance. If any measurements are within this range of the target, the optimisation loop is stopped. 
+    # Set a relative tolerance (percentage).
+    # If a measurement is within the tolerance from the target, the optimisation loop is stopped.
     relative_tolerance = 0.05
 
     # Define the search space of the experimental parameters.
@@ -109,7 +108,7 @@ def main():
         Parameters
         ----------
         liquid_volumes : np.ndarray
-            The liquid volumes of the experimental parameters used to generate 
+            The liquid volumes of the experimental parameters used to generate
             the experimental products in the current iteration.
 
         iteration_count : int
@@ -139,16 +138,15 @@ def main():
         objective_function=objective_function,
         liquid_names=liquid_names,
         measured_parameter_names=measured_parameter_names,
-        target_measurement = target_measurement,
+        target_measurement=target_measurement,
+        relative_tolerance=relative_tolerance,
         population_size=population_size,
-        name=name,
+        name=experiment_name,
         measurement_function=measurement_function,
         wellplate_shape=wellplate_shape,
         wellplate_locs=wellplate_locs,
-        total_volume=total_volume,
-        relative_tolerance= relative_tolerance,
+        total_volume=total_volume
     )
-
 
     # Start the optimisation loop.
     # In this experiment, Particle Swarm Optimisation is used.

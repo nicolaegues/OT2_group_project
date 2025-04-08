@@ -36,8 +36,10 @@ retrieving the RGB values of wells in the image.
 Next, we define the experimental setup and configuration.
 This starts with setting the experimental parameters and experimental response 
 variables.
-For optimisation, the target experimental response and the experimental 
-parameter search space is also defined.
+For optimisation, the target experimental response, the experimental 
+parameter search space, and a relative tolerance are also defined. The 
+relative tolerance is set so that the optimisation loop is stopped if a 
+measurement is close enough to the target.
 Note that the dilution agent should be entered as the first experimental 
 parameter because the first element will not considered as part of the search 
 space for optimisation. 
@@ -63,6 +65,9 @@ space for optimisation.
         96.1111111,
         37.84126984,
     ]  # Taken from a previous experiment.
+
+    # Set a relative tolerance. If any measurements are within this range of the target, the optimisation loop is stopped. 
+    relative_tolerance = 0.05
 
     # Define the search space of the experimental parameters.
     # In this experiment, this is the range of volumes for RYB colour pigments.
@@ -221,14 +226,15 @@ for *Random Forest* as the acquisition function.
         objective_function=objective_function,
         liquid_names=liquid_names,
         measured_parameter_names=measured_parameter_names,
+        target_measurement = target_measurement,
         population_size=population_size,
         name=name,
         measurement_function=measurement_function,
         wellplate_shape=wellplate_shape,
         wellplate_locs=wellplate_locs,
         total_volume=total_volume,
+        relative_tolerance= relative_tolerance,
     )
-
     # Start the optimisation loop.
     # In this experiment, Particle Swarm Optimisation is used.
     model.optimise(search_space, optimiser="PSO", num_iterations=num_iterations)
@@ -295,6 +301,18 @@ iterations are completed.
     pyswarms.single.global_best:  12%|██████████████████                                                                        |1/8, best_cost=17362.0
     Upload script, wait for robot, and then press any key to continue: 
 
+If at least one of the measurements in a given iteration falls within the specified 
+relative tolerance range of the target, the optimisation process is stopped:
+
+.. code-block:: text
+
+    pyswarms.single.global_best:  75%|█████████████████████████████████████████████████████████████████████████████████████████████▊                               |6/8, best_cost=1.08
+    Upload script, wait for robot, and then press any key to continue:
+
+    Stopping the optimization - measurements have been found that are close to the target (within 5.0%):
+    - measurement = [14.43234437 20.13919216 14.3225938 ], percent differences of each value to the target values = [3.09 0.7  4.52]%
+
+
 *Note: All measured and generated data is saved to a data folder.*
 
 Full Script
@@ -305,8 +323,8 @@ The full script for the example is given below.
 
     """
     An example script showing how to use the optobot package. This script uses the
-    optobot package in the context of a colour mixing experiment, where red, yellow 
-    and blue (RYB) liquid pigments are mixed to create a target colour.
+    optobot package in the context of a colour mixing experiment, where blue, yellow 
+    and red (BYR) liquid pigments are mixed to create a target colour.
     """
 
     # Import required libraries.
@@ -319,11 +337,13 @@ The full script for the example is given below.
     def main():
         # Define an experiment name.
         experiment_name = "colour_experiment"
+        data_storage_folder = "examples/results_data" 
+        name = f"{data_storage_folder}/{experiment_name}"
 
         # Define the experimental parameters.
-        # In this experiment, these are RYB colour pigments and water.
+        # In this experiment, these are BYR colour pigments and water.
         # NOTE: The dilution agent should be entered as the first parameter.
-        liquid_names = ["water", "red", "yellow", "blue"]
+        liquid_names = ["water", "blue", "yellow", "red"]
 
         # Define the measured parameters.
         # In this experiment, these are the RGB values of the experimental products.
@@ -337,8 +357,11 @@ The full script for the example is given below.
             37.84126984,
         ]  # Taken from a previous experiment.
 
+        # Set a relative tolerance. If any measurements are within this range of the target, the optimisation loop is stopped. 
+        relative_tolerance = 0.05
+
         # Define the search space of the experimental parameters.
-        # In this experiment, this is the range of volumes for RYB colour pigments.
+        # In this experiment, this is the range of volumes for BYR colour pigments.
         search_space = [[0.0, 30.0], [0.0, 30.0], [0.0, 30.0]]
 
         # Define the well plate dimensions.
@@ -439,13 +462,16 @@ The full script for the example is given below.
             objective_function=objective_function,
             liquid_names=liquid_names,
             measured_parameter_names=measured_parameter_names,
+            target_measurement = target_measurement,
             population_size=population_size,
             name=name,
             measurement_function=measurement_function,
             wellplate_shape=wellplate_shape,
             wellplate_locs=wellplate_locs,
             total_volume=total_volume,
+            relative_tolerance= relative_tolerance,
         )
+
 
         # Start the optimisation loop.
         # In this experiment, Particle Swarm Optimisation is used.
@@ -454,3 +480,4 @@ The full script for the example is given below.
 
     if __name__ == "__main__":
         main()
+

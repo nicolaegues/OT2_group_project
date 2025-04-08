@@ -1,40 +1,55 @@
-Notes
-============
+FAQ & Notes
+===========
 
-A Fully Automated Version in the Future
---------------------------------------
++ When I use the ``get_colours`` function and run an optimisation script, I get 
+  errors related to figures not appearing. What should I do?
 
-The package was designed to allow for a scenario where the robot does not
-have a network connection. This scenario means that, for instance, no 
-external python packages can be imported into the OT2 protocol script as 
-this requires connecting to the robot via SSH and manually installing
-the packages in the robot's terminal. 
-As a consequence, the protocol script must be kept simple and cannot contain 
-any optimisation funtcion calls, for example. OptoBot bypasses this by 
-running a separate python function that generates a new (simple) protocol 
-script at each iteration. 
+*If using a Linux OS, ensure that the Python bindings for the chosen graphical 
+user interface backend are installed and up to date.*
 
-However, this limits the current implementation to being semi-automatic. In the
-future, this package will allow for the scenario where the robot is connected
-to the network, and the user wants to take advantage of this fact to fully
-automate the entire experiment. A proposed version of this - still in 
-developement - can be found in the feat/network branch in the GitHub repository 
-of the OptoBot package. 
+*For the Tkinter backend, use the following command to update bindings.*
 
-In this version, the optimisation loop works just like in the current 
-implementation - except that the experimental configuration and the automated 
-optimisation loop are both defined within the OT2 protocol script itself. The 
-call to optimise the model is hereby performed within the run() function of the
-robot, after the labware is defined. At each iteration, the instructions for the 
-robot are updated in real-time - all still within the same protocol script. 
-The user thus only ever needs to upload one protocol to the app at the beginning. 
+.. code-block:: bash
+    
+    $ sudo apt install python3-tk
 
-One downside to this implementation is that since it is fully-automated, the 
-option to let the user manually input measurements is removed. In the context of 
-a colorimetric expriment, this means the well detection and color extraction must 
-happen fully automatically. In the future, if users do not have a way of performing 
-the measurementsin an automated fashion, they should default to the original no-network
-scenario.
+*For the Qt5 backend, use the following command to update bindings.*
+
+.. code-block:: bash
+    
+    $ sudo apt install python3-pyqt5
 
 
+Under Development
+-----------------
 
+True Automated Optimisation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The current implementation of OptoBot was developed in an environment where the 
+Opentrons OT-2 robot was not connected to the internet.
+This meant that 3rd-party Python packages could not be installed on the OT-2 
+(through *SSH*), limiting the complexity of the OT-2 protocol script.
+As a consequence, the current implementation of OptoBot handles the optimisation 
+process on the user's computer and generates an OT-2 protocol script between 
+iterations of optimisation.
+The user has to upload the generated OT-2 protocol script at each iteration of 
+optimisation, making the optimisation loop semi-automated.
+Despite its semi-automated nature, the current implementation of OptoBot is 
+flexible and offers easier integration with custom measurement processes of 
+experimental response variables.
+
+A feature for users that have an environment where their Opentrons OT-2 is 
+connected to the internet and want to take advantage of a true automated 
+optimisation loop is under development. 
+This feature will generate a OT-2 protocol script that contains the entire 
+experimental optimisation workflow, where the instructions for the OT-2 are 
+updated in real-time at each iteration of optimisation.
+The user will have to upload the generated OT-2 protocol script to the OT-2 
+just once and the whole process will be automated.
+Although this feature implements a true automated optimisation loop, it is less 
+flexible as the measurement of experimental response variables between each 
+iteration of optimisation have to be automated through the OT-2 itself.
+Manual measurement processes of experimental response variables will not be 
+supported and users should use the default semi-automated version that OptoBot 
+offers in its current implementation.

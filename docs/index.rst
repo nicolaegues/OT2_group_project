@@ -27,3 +27,4 @@ Checkout the package below!
     installation
     usage
     basic_example
+    notes

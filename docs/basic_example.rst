@@ -39,10 +39,15 @@ variables.
 For optimisation, the target experimental response, the experimental 
 parameter search space and a relative tolerance are defined. 
 The relative tolerance is set so that the optimisation loop stops if a measured 
-experimental response is close enough to the target experimental response.
-Note that the dilution agent should be entered as the first experimental 
-parameter because the first element will not considered as part of the search 
-space for optimisation. 
+experimental response is close enough to the target experimental response. 
+Note that the target experimental response can be set to ``None`` if 
+minimisation/maximisation based optimisation is desired instead of target based 
+optimisation. 
+However, the user should take into account that a target experimental response 
+has not been set when defining their objective function.
+Also note that the dilution agent should be entered as the first experimental 
+parameter because the first element will not be considered as part of the 
+search space for optimisation.
 
 .. code-block:: python
 
@@ -60,6 +65,7 @@ space for optimisation.
 
     # Set a target measurement.
     # In this experiment, this a set of defined RGB values.
+    # NOTE: The target can be set to None for minimisation/maximisation based optimisation.
     target_measurement = [
         114.8412698,
         96.1111111,
@@ -352,6 +358,7 @@ The full script for the example is given below.
 
         # Set a target measurement.
         # In this experiment, this a set of defined RGB values.
+        # NOTE: The target can be set to None for minimisation/maximisation based optimisation.
         target_measurement = [
             114.8412698,
             96.1111111,

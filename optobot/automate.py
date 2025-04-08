@@ -1,6 +1,7 @@
 import datetime
 import os
 import string
+import sys
 
 import numpy as np
 import pandas as pd
@@ -15,7 +16,6 @@ fix different nr of population_size
 store and import previous optimisation data (to not have to repeat runs)
 
 """
-
 
 class OptimisationLoop:
     """
@@ -49,12 +49,15 @@ class OptimisationLoop:
         objective_function,
         liquid_names,
         measured_parameter_names,
+        target_measurement,
+        relative_tolerance = 0.05,
         population_size=12,
         name="experiment",
         measurement_function="manual",
         wellplate_shape=[8, 12],
         wellplate_locs=[5],
         total_volume=90.0,
+    
     ):
 
         self.objective_function = objective_function
@@ -77,6 +80,8 @@ class OptimisationLoop:
         self.num_wellplates = len(wellplate_locs)
         self.total_volume = total_volume
         self.blank_row_space = 1  # vertical space between wellplate data in CSV files (if more than one is used)
+        self.target_measurement = np.array(target_measurement)
+        self.relative_tolerance = relative_tolerance
 
         # Initialize dataframes for storing experimental data
         self.liquid_volume_df, self.measurements_df, self.error_df, self.all_data_df = (
@@ -139,6 +144,10 @@ class OptimisationLoop:
         # Data storage
         self.store_data(liquid_volumes, measurements, errors)
 
+        # Terminate the optimisation loop if the measurements are close enough to the target measurement, 
+        # based on the specified relative tolerance
+        self.check_convergence(measurements)
+            
         # update the iteration count
         self.iteration_count += 1
 
@@ -300,6 +309,36 @@ class OptimisationLoop:
             self.population_size, self.num_measured_parameters
         )
         return measurements
+    
+    def check_convergence(self, measurements):
+        # close_mask is a boolean array that indicates which of the measurements fall within the 
+        # specified relative tolerance when compared to the target measurement.
+        close_mask = np.isclose(measurements, self.target_measurement, rtol=self.relative_tolerance) # (12, 3) in the rgb default case
+
+        #for example, if we're measuring RGB values, we want to know whether ALL three fall within the tolerance. 
+        # without this, close_mask would be a boolean array for each of the rgb channels separately. In other words, we always want to make sure that each well
+        # only has one boolean "closeness" value. 
+        close_mask = np.all(close_mask, axis=-1)
+
+        # If any measurements fall within the specified tolerance, stop the optimisation loop
+        if np.sum(close_mask) > 0:   
+
+            print("Stopping optimization: measurements close-enough to the target were found.")
+
+            well_row_positions = np.where(close_mask)
+            # print info for each close match
+            print(f"Measurements close to ideal (within {self.relative_tolerance*100}%):")
+
+            for well_pos in well_row_positions:
+                
+                actual = measurements[well_pos]
+
+                #the additional 1e-8 is in case the target_measurement is 0 - to avoid a zero division error
+                percent_diff = abs((actual - self.target_measurement) / (self.target_measurement + 1e-8))*100
+                percent_diff = np.round(percent_diff, 2)
+                print(f" - measurement = {actual}, percent differences of each measurement value = {percent_diff}%")
+                        
+            sys.exit("Target measurement tolerance met — stopping optimization.")
 
     def optimise(self, search_space, optimiser, num_iterations=8):
         if optimiser == "PSO":

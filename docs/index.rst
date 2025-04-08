@@ -13,7 +13,7 @@ Its aim is to enable lab scientists to implement automated experimental
 optimisation in their own work with minimal programming experience. 
 Checkout the package below!
 
-+ **Release Version**: 0.1.0
++ **Release Version**: 0.1.2
 + **GitHub**: `<https://github.com/nicolaegues/OptoBot>`_
 
 - **Open Source**: MIT License

@@ -323,12 +323,11 @@ class OptimisationLoop:
         # If any measurements fall within the specified tolerance, stop the optimisation loop
         if np.sum(close_mask) > 0:   
 
-            print("Stopping optimization: measurements close-enough to the target were found.")
+            print(f"\nStopping the optimization - measurements have been found that are close to the target (within {self.relative_tolerance*100}%): ")
 
-            well_row_positions = np.where(close_mask)
+            well_row_positions = np.where(close_mask)[0]
+
             # print info for each close match
-            print(f"Measurements close to ideal (within {self.relative_tolerance*100}%):")
-
             for well_pos in well_row_positions:
                 
                 actual = measurements[well_pos]
@@ -336,9 +335,9 @@ class OptimisationLoop:
                 #the additional 1e-8 is in case the target_measurement is 0 - to avoid a zero division error
                 percent_diff = abs((actual - self.target_measurement) / (self.target_measurement + 1e-8))*100
                 percent_diff = np.round(percent_diff, 2)
-                print(f" - measurement = {actual}, percent differences of each measurement value = {percent_diff}%")
+                print(f" - measurement = {actual}, percent differences of each value to the target values= {percent_diff}%")
                         
-            sys.exit("Target measurement tolerance met — stopping optimization.")
+            sys.exit("Target measurement tolerance has been met — exiting the program.")
 
     def optimise(self, search_space, optimiser, num_iterations=8):
         if optimiser == "PSO":

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "optobot"
-version = "0.1.2b2"
+version = "0.1.2rc1"
 description = "A package for automated experimental optimisation using an Opentrons OT-2 robot."
 readme = "README.md"
 authors = [
